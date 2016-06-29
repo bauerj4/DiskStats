@@ -1,0 +1,2 @@
+#define GADGET2
+#define CENTER_ON_DISK_CENTROID

@@ -1,0 +1,10 @@
+DiskStats++ is an open source project dedicated to making available
+to the wider galactic dynamics community (particularly theorists) a
+set of analysis codes to efficiently analyze large data sets.   More
+to come later.
+
+Dependencies:  
+
+GSL (after and including 1.16)
+FFTW 3
+gnuplot (if plots are wanted)
