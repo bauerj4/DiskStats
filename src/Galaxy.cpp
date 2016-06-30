@@ -169,3 +169,43 @@ void Galaxy::CenterOnDiskCentroid(){
     z_bar = z_sum/count;
   }
 }
+
+
+
+/*
+  Get a list of the particle x positions
+*/
+
+std::vector<double> Galaxy::GetDiskXs(){
+  std::vector<double> xVals;
+  for (int i = 0; i < myDisk.P.size(); i++){
+    xVals.push_back(myDisk.P[i]->PosX());
+  }
+  return xVals;
+}
+
+/*
+  Get a list of the particle y positions
+*/
+
+std::vector<double>  Galaxy::GetDiskYs(){
+  std::vector<double> yVals;
+  for (int i = 0; i < myDisk.P.size(); i++){
+    yVals.push_back(myDisk.P[i]->PosY());
+  }
+  return yVals;
+}
+
+/*
+  Get a list of the particle z positions
+*/
+
+std::vector<double>  Galaxy::GetDiskZs(){
+  std::vector<double> zVals;
+  for (int i = 0; i < myDisk.P.size(); i++){
+    zVals.push_back(myDisk.P[i]->PosZ());
+  }
+  return zVals;
+}
+
+

@@ -4,7 +4,7 @@ CFLAGS   =
 CC       = g++
 INCL	 = include/*
 SRC 	 = src/Main.cpp src/Snapshot.cpp src/ReadParameterFile.cpp src/Globals.cpp src/StrFormat.cpp \
-	src/Particle.cpp src/Galaxy.cpp
+	src/Particle.cpp src/Galaxy.cpp  src/LinAlg.cpp src/Histogram.cpp
 
 make:
 	python make_macros.py

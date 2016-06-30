@@ -3,6 +3,7 @@
 #include "../include/Snapshot.h"
 #include "../include/Globals.h"
 #include "../include/Galaxy.h"
+#include "../include/Histogram.h"
 #include <string>
 #include <iostream>
 
@@ -36,7 +37,7 @@ int main(int argc, char ** argv){
     Global::snapName = Global::GetGadgetSnapshotName(Global::snapNum);
 #else
     Global::snapName = Global::context.SnapshotBase + std::to_string(Global::snapNum);
-#endif
+#endif // GADGET2
 
     // Create and load new snapshot data
     Global::newSnap = new Snapshot((char*)Global::snapName.c_str(), 1);
@@ -48,11 +49,33 @@ int main(int argc, char ** argv){
 				    Global::newSnap);
 #ifdef CENTER_ON_DISK_CENTROID
     Global::thisGalaxy->CenterOnDiskCentroid();
-#endif
+#endif // CENTER_ON_DISK_CENTROID
 
     // Make density histograms
 
+    Global::xbins = Global::LinearSpacing(-25,25,100);
+    Global::ybins = Global::LinearSpacing(-25,25,100);
+    Global::zbins = Global::LinearSpacing(-10,10,100);
+
+
+#ifdef DENSITY_HISTOGRAMS
+    std::vector<double> xVals = Global::thisGalaxy->GetDiskXs();
+    std::vector<double> yVals = Global::thisGalaxy->GetDiskYs();
+    std::vector<double> zVals = Global::thisGalaxy->GetDiskZs();
+    Global::diskXYHist = new Histogram2D<double>(xVals, yVals, Global::xbins,Global::ybins);
+    Global::diskXZHist = new Histogram2D<double>(xVals, zVals, Global::xbins,Global::zbins);
+    Global::diskYZHist = new Histogram2D<double>(yVals, zVals, Global::ybins,Global::zbins);    
+
+    Global::diskXYHist->PrintASCII("./hist");
+#endif // DENSITY_HISTOGRAMS
+
     // Free memory when we're done with snapshot
+
+    //delete Global::xbins;
+    //delete Global::ybins;
+    delete Global::diskXYHist;
+    delete Global::diskXZHist;
+    delete Global::diskYZHist;
     delete Global::thisGalaxy;
     delete Global::newSnap;
   }
