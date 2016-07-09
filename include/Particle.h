@@ -30,6 +30,9 @@ class Particle{
   double VelY(){return Vel[1];}
   double VelZ(){return Vel[2];}
 
+  double Potential(){return Pot;}
+  double M(){return Mass;}
+
   /*
     Add to position or velocity vectors
   */

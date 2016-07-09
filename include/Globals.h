@@ -13,7 +13,12 @@ namespace Global{
   */
 
   extern int snapNum;
-  
+  extern int posCounter;
+
+  extern double xBar;
+  extern double yBar;
+  extern double zBar;
+
   extern Snapshot * newSnap;
 
   extern Galaxy * thisGalaxy;
@@ -31,6 +36,11 @@ namespace Global{
   extern Histogram2D<double> * diskXYHist;
   extern Histogram2D<double> * diskXZHist;
   extern Histogram2D<double> * diskYZHist;
+#endif
+
+#ifdef COMPUTE_VIRIAL_RATIO
+  extern double virialRatio;
+  extern std::vector<double> viralRatios;
 #endif
   /*
     Prototypes for global functions

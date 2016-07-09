@@ -37,6 +37,10 @@ class Snapshot{
   std::vector<std::vector<double> > Velocities;
   std::vector<double> Densities;
 
+#ifdef USE_POTENTIALS
+  std::vector<double> Potentials;
+#endif
+
  public:
   Snapshot(char * FILE_PATH, int n_files);
 
@@ -50,6 +54,7 @@ class Snapshot{
   int Type(int idx){return Types[idx];}
   double Mass(int idx){return Masses[idx];}
   double Rho(int idx){return Densities[idx];}
+  double Pot(int idx){return Potentials[idx];}
 
 
   std::vector<double> Pos(int idx){return Positions[idx];}
@@ -62,6 +67,7 @@ class Snapshot{
   double VelY(int idx){return Velocities[idx][1];}
   double VelZ(int idx){return Velocities[idx][2];}
 
+  double Time(){return header.time;}
 
   /*
     Load data

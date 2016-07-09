@@ -44,9 +44,16 @@ int main(int argc, char ** argv){
 
     // Create the galaxy
 
+#ifdef USE_X_BAR
+    Global::thisGalaxy = new Galaxy(Global::xBar, Global::yBar, Global::zBar, \
+				    Global::context.GalaxyR0, Global::newSnap);
+#else
     Global::thisGalaxy = new Galaxy(Global::context.GalaxyX0, Global::context.GalaxyY0,\
 				    Global::context.GalaxyZ0, Global::context.GalaxyR0,\
 				    Global::newSnap);
+#endif // USE_X_BAR
+
+
 #ifdef CENTER_ON_DISK_CENTROID
     Global::thisGalaxy->CenterOnDiskCentroid();
 #endif // CENTER_ON_DISK_CENTROID
@@ -73,6 +80,11 @@ int main(int argc, char ** argv){
 
     Global::GNUPLOT_DensityScripts(Global::snapNum);
 #endif // DENSITY_HISTOGRAMS
+
+#ifdef COMPUTE_VIRIAL_RATIO
+    Global::virialRatio = Global::thisGalaxy->ComputeVirialRatio();
+    std::cout << "Virial Ratio: " << Global::virialRatio << std::endl;
+#endif
 
     // Free memory when we're done with snapshot
 

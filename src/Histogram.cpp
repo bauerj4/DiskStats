@@ -10,9 +10,10 @@
 
 template <typename T>
 Histogram2D<T>::Histogram2D(std::vector<T> &datax, std::vector<T> &datay, \
-			    std::vector<T> &binsx, std::vector<T> &binsy){
+			    std::vector<T> &binsX, std::vector<T> &binsY){
 
   std::pair<T,T> p;
+
 
   /*
     It is equally efficient to loop through the data and ask which bin each point is in
@@ -25,7 +26,9 @@ Histogram2D<T>::Histogram2D(std::vector<T> &datax, std::vector<T> &datay, \
     std::cout << "Error in Histogram2D<T>(): dimensions of data are incompatible." << std::endl;
     exit(2);
   }
-  
+
+  binsx = binsX;
+  binsy = binsY;
   /*
     Set empty counts
   */
@@ -37,6 +40,9 @@ Histogram2D<T>::Histogram2D(std::vector<T> &datax, std::vector<T> &datay, \
     }
   }
 
+#ifdef OPENMP
+#pragma omp parallel for private (p)
+#endif
   for (int i = 0; i < datax.size(); i++){
     p.first  = datax[i];
     p.second = datay[i];
@@ -70,12 +76,28 @@ template <typename T>
 void Histogram2D<T>::PrintASCII(std::string filepath){
   std::ofstream outfile(filepath.c_str());
   std::cout << "Printing a (" << counts.size() << "," << counts[0].size() << ") matrix.\n";
-  for (int i = 0; i < counts.size(); i++){
-    for (int j = 0; j < counts[0].size(); j++){
-      if (j != counts[0].size() - 1)
-	outfile << counts[j][i] << " ";
-      else
-        outfile << counts[j][i] << "\n";
+  for (int i = 0; i < counts.size() + 1; i++){
+    for (int j = 0; j < counts[0].size() + 1; j++){
+      if (i != 0 && j != 0){
+	if (j != counts[0].size())
+	  outfile << counts[j-1][i-1] << " ";
+	else
+	  outfile << counts[j-1][i-1] << "\n";
+      }
+      else if (i != 0 && j == 0){
+	outfile << (binsy[i - 1] + binsy[i])/2. << " ";
+      }
+      else if (i == 0 && j != 0){
+	if (j != counts[0].size()){
+          outfile << (binsx[j-1] + binsx[j])/2. << " ";
+	}
+        else{
+          outfile << (binsx[j-1] + binsx[j])/2. << "\n";
+	}
+      }
+      else if (i == 0 && j == 0){
+	outfile << binsx.size() - 1 << " ";
+      }
     }
   }
 }

@@ -12,6 +12,11 @@ namespace Global{
   */
 
   int snapNum;
+  int posCounter;
+
+  double xBar;
+  double yBar;
+  double zBar;
 
   Context context;
 
@@ -31,5 +36,11 @@ namespace Global{
   Histogram2D<double> * diskXZHist;
   Histogram2D<double> * diskYZHist;
 #endif
+
+#ifdef COMPUTE_VIRIAL_RATIO
+  double virialRatio;
+  std::vector<double> viralRatios;
+#endif
+
 
 }

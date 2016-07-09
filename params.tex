@@ -5,7 +5,10 @@
 
 % File I/O options
 
-SnapshotBase     /media/th3pwnguin/x86_linux_storag/scratch/PhD/Cosmological_Disks_w_Denis/transients_tests/spherical_EP_galactics/gadget-3-with-galactics-disks/OUTPUTS/snapshot_
+%SnapshotBase     /media/th3pwnguin/x86_linux_storag/scratch/PhD/Cosmological_Disks_w_Denis/transients_tests/spherical_EP_galactics/gadget-3-with-galactics-disks/OUTPUTS/snapshot_
+
+SnapshotBase       ../Cosmological_Disks_w_Denis/transients_tests/full_cosmological_light/live_short/gadget-3-with-galactics-disks/OUTPUTS/snapshot_
+
 NumSnaps           100
 PathToGnuplot      ./Plots
 DensityPalette     ./Palettes/parula.pal
@@ -16,8 +19,8 @@ GalaxyList         ./galaxy_list.dat
 
 % Cosmology
 
-ComovingIntegration    0
-PeriodicBoundaries     0
+ComovingIntegration    1
+PeriodicBoundaries     1
 HubbleParam            0.679
 Omega0                 0.306
 OmegaB                 0.0481

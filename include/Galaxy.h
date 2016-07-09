@@ -20,6 +20,7 @@ class Galaxy{
 
   // Center on disk via shrinking sphere of centroids
   void CenterOnDiskCentroid();
+  double ComputeVirialRatio();
   std::vector<double> GetDiskXs();
   std::vector<double> GetDiskYs();
   std::vector<double> GetDiskZs();

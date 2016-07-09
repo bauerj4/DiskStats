@@ -21,8 +21,8 @@ void Global::GNUPLOT_DensityScripts(int i){
   //outfileXY << "set border 3 back ls 11" << std::endl;
   outfileXY << "set view map" << std::endl;
   outfileXY << "set logscale cb" << std::endl;
-  outfileXY << "splot \'" << Global::GetDiskXYDensityHistName(Global::snapNum) \
-	    << "\' matrix with image " << std::endl;
+  outfileXY << "plot \'" << Global::GetDiskXYDensityHistName(Global::snapNum) \
+	    << "\' matrix nonuniform  with image" << std::endl;
 
   outfileXY.close();
   // XZ density
@@ -36,8 +36,8 @@ void Global::GNUPLOT_DensityScripts(int i){
   //  outfileXZ << "set border 3 back ls 11" << std::endl;
   outfileXZ << "set view map" << std::endl;
   outfileXZ << "set logscale cb" << std::endl;
-  outfileXZ << "splot \'" << Global::GetDiskXZDensityHistName(Global::snapNum) 
-	    << "\' matrix with image " << std::endl;
+  outfileXZ << "plot \'" << Global::GetDiskXZDensityHistName(Global::snapNum) 
+	    << "\' matrix nonuniform with image" << std::endl;
 
   outfileXZ.close();
   
@@ -52,8 +52,8 @@ void Global::GNUPLOT_DensityScripts(int i){
   //  outfileYZ << "set border 3 back ls 11" << std::endl;
   outfileYZ << "set view map" << std::endl;
   outfileYZ << "set logscale cb" << std::endl;
-  outfileYZ << "splot \'" << Global::GetDiskYZDensityHistName(Global::snapNum) \
-	    << "\' matrix with image " << std::endl;
+  outfileYZ << "plot \'" << Global::GetDiskYZDensityHistName(Global::snapNum) \
+	    << "\' matrix nonuniform  with image" << std::endl;
 
   outfileYZ.close();
 }

@@ -34,6 +34,11 @@ void Snapshot::LoadGadget2(char * FILENAME, int n_snaps){
   int type;
   int cumSum;
 
+  Global::xBar = 0.;
+  Global::yBar = 0.;
+  Global::zBar = 0.;
+  Global::posCounter = 0;
+
   /*
     Try opening the file
   */
@@ -95,7 +100,6 @@ void Snapshot::LoadGadget2(char * FILENAME, int n_snaps){
     newPos[1] = (double) empty3Array[1];
     newPos[2] = (double) empty3Array[2];
     Positions.push_back(newPos);
-
     //    std::cout << "p = [" << newPos[0] << "," << newPos[1] << "," << newPos[2] << "]" << std::endl;
   }
 
@@ -182,23 +186,112 @@ void Snapshot::LoadGadget2(char * FILENAME, int n_snaps){
 	cumSum += header.npart[j];
 	j++;
       }
-
-      type = j - 1;
-    
       
-
-      fread(&emptyFloat, sizeof(float), 1, file);
-      double newMass = (double)emptyFloat;
-      Masses.push_back(newMass);
+      type = j - 1;
+      
+      if (header.mpart_arr[type] == 0){
+	fread(&emptyFloat, sizeof(float), 1, file);
+	double newMass = (double)emptyFloat;
+	Masses.push_back(newMass);
+      }
+      else{
+	Masses.push_back(header.mpart_arr[type]);
+      }
       Types.push_back(type);
+      if (type == 2){
+	Global::xBar += Positions[i][0];
+	Global::yBar += Positions[i][1];
+	Global::zBar += Positions[i][2];
+	Global::posCounter++;
+      }
       //      std::cout << "Mass, Type: " << newMass << "," << type << std::endl;   
     }
+    
+    Global::xBar /= Global::posCounter;
+    Global::yBar /= Global::posCounter;
+    Global::zBar /= Global::posCounter;
     
 
     // Read Fortran buffer
 
     fread(&gadgetFortranBuffer, 4, 1, file);
 
+    
+
+    /*
+      Get internal energies (empty if no SPH)
+    */
+    std::cout << "Reading Block 6: Internal Energies" << std::endl;
+
+    fread(&gadgetFortranBuffer, 4, 1, file);
+
+    for (int i = 0; i < header.npart[0]; i++){
+      fread(&emptyFloat, sizeof(float), 1, file);
+      float newE = emptyFloat;
+      //Potentials.push_back(newPot);   
+      //std::cout << newE << std::endl;
+    }
+
+    fread(&gadgetFortranBuffer, 4, 1, file);
+
+
+    /*
+      Get density (empty if no SPH)
+    */
+    
+
+    std::cout << "Reading Block 7: Densities" << std::endl;
+    fread(&gadgetFortranBuffer, 4, 1, file);
+
+    for (int i = 0; i < header.npart[0]; i++){
+      fread(&emptyFloat, sizeof(float), 1, file);
+      float newRho = emptyFloat;
+      //Potentials.push_back(newPot);                                                                                                          
+      //std::cout << newRho << std::endl;
+    }
+    
+
+    fread(&gadgetFortranBuffer, 4, 1, file);
+
+    /*
+      Get smoothing (empty if no SPH)
+    */
+
+    std::cout << "Reading Block 8: Smoothing" << std::endl;
+    fread(&gadgetFortranBuffer, 4, 1, file);
+
+    for (int i = 0; i < header.npart[0]; i++){
+      fread(&emptyFloat, sizeof(float), 1, file);
+      float newSmooth = emptyFloat;
+      //Potentials.push_back(newPot);                                                                                                          
+      // std::cout << newSmooth << std::endl;
+    }
+
+    fread(&gadgetFortranBuffer, 4, 1, file);
+
+    /*
+      Get potentials
+    */
+    std::cout << "Reading Block 9: Potentials" << std::endl;
+
+    fread(&gadgetFortranBuffer, 4, 1, file);
+
+    for (int i = 0; i < nparts; i++){
+      fread(&emptyFloat, sizeof(float), 1, file);
+      float newPot = emptyFloat;
+      //      std::cout << newPot << "," << Positions[i][0] << "," << Positions[i][1] \
+      //		<< "," << Positions[i][2] << std::endl;
+#ifdef USE_POTENTIALS
+      if (newPot <= 0.){
+	Potentials.push_back(newPot);
+      }
+      else{
+	Potentials.push_back(-newPot);
+      }
+#endif
+    }
+
+    fread(&gadgetFortranBuffer, 4, 1, file);
 
   }
 
@@ -214,7 +307,7 @@ void Snapshot::LoadGadget2(char * FILENAME, int n_snaps){
 
 void Snapshot::PrintGadget2Header(){
   std::cout << "Type 0 (Gas): " << header.npart[0] << " (m=" << header.mpart_arr[0] << ")" << std::endl;
-  std::cout << "Type 1 (Halo): " << header.npart[2] << " (m=" << header.mpart_arr[1] << ")" << std::endl;
+  std::cout << "Type 1 (Halo): " << header.npart[1] << " (m=" << header.mpart_arr[1] << ")" << std::endl;
   std::cout << "Type 2 (Disk): " << header.npart[2] << " (m=" << header.mpart_arr[2] << ")" << std::endl;
   std::cout << "Type 3 (Bulge): " << header.npart[3] << " (m=" << header.mpart_arr[3] << ")" << std::endl;
   std::cout << "Type 4 (Other): " << header.npart[4] << " (m=" << header.mpart_arr[4] << ")" << std::endl;
