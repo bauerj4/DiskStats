@@ -42,6 +42,12 @@ namespace Global{
   void PrintParameters();
 
   std::string GetGadgetSnapshotName(int i);
+  std::string GetDiskXYDensityHistName(int i);
+  std::string GetDiskXZDensityHistName(int i);
+  std::string GetDiskYZDensityHistName(int i);
+
+  void GNUPLOT_DensityScripts(int i);
+
 
   
 }

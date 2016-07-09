@@ -53,12 +53,13 @@ int main(int argc, char ** argv){
 
     // Make density histograms
 
-    Global::xbins = Global::LinearSpacing(-25,25,100);
-    Global::ybins = Global::LinearSpacing(-25,25,100);
-    Global::zbins = Global::LinearSpacing(-10,10,100);
+    Global::xbins = Global::LinearSpacing(-25,25,Global::context.XGridRes);
+    Global::ybins = Global::LinearSpacing(-25,25,Global::context.YGridRes);
+    Global::zbins = Global::LinearSpacing(-25,25,Global::context.ZGridRes);
 
 
 #ifdef DENSITY_HISTOGRAMS
+
     std::vector<double> xVals = Global::thisGalaxy->GetDiskXs();
     std::vector<double> yVals = Global::thisGalaxy->GetDiskYs();
     std::vector<double> zVals = Global::thisGalaxy->GetDiskZs();
@@ -66,13 +67,15 @@ int main(int argc, char ** argv){
     Global::diskXZHist = new Histogram2D<double>(xVals, zVals, Global::xbins,Global::zbins);
     Global::diskYZHist = new Histogram2D<double>(yVals, zVals, Global::ybins,Global::zbins);    
 
-    Global::diskXYHist->PrintASCII("./hist");
+    Global::diskXYHist->PrintASCII(Global::GetDiskXYDensityHistName(Global::snapNum));
+    Global::diskXZHist->PrintASCII(Global::GetDiskXZDensityHistName(Global::snapNum));
+    Global::diskYZHist->PrintASCII(Global::GetDiskYZDensityHistName(Global::snapNum));
+
+    Global::GNUPLOT_DensityScripts(Global::snapNum);
 #endif // DENSITY_HISTOGRAMS
 
     // Free memory when we're done with snapshot
 
-    //delete Global::xbins;
-    //delete Global::ybins;
     delete Global::diskXYHist;
     delete Global::diskXZHist;
     delete Global::diskYZHist;

@@ -74,11 +74,24 @@ void Global::ReadParameterFile(char * FILENAME){
       Global::context.BulgeParticleType = stoi(value);
     else if (option == "MultipleGalaxies")
       Global::context.MultipleGalaxies = stoi(value);
+    else if (option == "RGridRes")
+      Global::context.RGridRes = stoi(value);
+    else if (option == "XGridRes")
+      Global::context.XGridRes = stoi(value);
+    else if (option == "YGridRes")
+      Global::context.YGridRes = stoi(value);
+    else if (option == "ZGridRes")
+      Global::context.ZGridRes = stoi(value);
 
     else if (option == "SnapshotBase")
       Global::context.SnapshotBase = value;    
     else if (option == "GalaxyList")
       Global::context.GalaxyList = value;
+    else if (option == "PathToGnuplot")
+      Global::context.PathToGnuplot = value;
+    else if (option == "DensityPalette")
+      Global::context.DensityPalette = value;
+
 
   }
 }
@@ -95,6 +108,7 @@ void Global::PrintParameters(){
   std::cout << std::endl;
   std::cout << "[File I/O]\n" << std::endl;
   std::cout << "SnapshotBase = " << Global::context.SnapshotBase << std::endl;
+  std::cout << "PathToGnuPlot = " << Global::context.PathToGnuplot << std::endl;
   std::cout << "NumSnaps = " << Global::context.NumSnaps << std::endl;
   std::cout << "-------------------------------------\n" << std::endl;
 }

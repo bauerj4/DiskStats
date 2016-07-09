@@ -39,6 +39,7 @@ template <typename T> class Histogram2D{
 
   // Print to space separated ascii file
   void PrintASCII(char * path);
+  void PrintASCII(std::string filepath);
 };
 
 #endif

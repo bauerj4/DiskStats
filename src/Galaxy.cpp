@@ -168,6 +168,27 @@ void Galaxy::CenterOnDiskCentroid(){
     y_bar = y_sum/count;
     z_bar = z_sum/count;
   }
+
+  std::cout << "Shifting halo positions by shrinking sphere coordinates..." << std::endl;
+
+  for (int i = 0; i < myHalo.P.size(); i++){
+    myHalo.P[i]->AddPos(-x_bar, -y_bar, -z_bar);
+  }
+
+  std::cout << "Shifting disk positions by shrinking sphere coordinates..." << std::endl;
+
+  for (int i = 0; i < myDisk.P.size(); i++){
+    myDisk.P[i]->AddPos(-x_bar, -y_bar, -z_bar);
+  }
+
+  std::cout << "Shifting bulge positions by shrinking sphere coordinates..." << std::endl;
+
+  for (int i = 0; i < myBulge.P.size(); i++){
+    myBulge.P[i]->AddPos(-x_bar, -y_bar, -z_bar);
+  }
+
+  std::cout << "Positions shifted." << std::endl;
+  
 }
 
 

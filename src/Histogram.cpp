@@ -59,12 +59,27 @@ void Histogram2D<T>::PrintASCII(char * filepath){
   for (int i = 0; i < counts.size(); i++){
     for (int j = 0; j < counts[0].size(); j++){
       if (j != counts[0].size() - 1)
-	outfile << counts[i][j] << " ";
+	outfile << counts[j][i] << " ";
       else
-	outfile << counts[i][j] << "\n";
+	outfile << counts[j][i] << "\n";
     } 
   }
 }
+
+template <typename T>
+void Histogram2D<T>::PrintASCII(std::string filepath){
+  std::ofstream outfile(filepath.c_str());
+  std::cout << "Printing a (" << counts.size() << "," << counts[0].size() << ") matrix.\n";
+  for (int i = 0; i < counts.size(); i++){
+    for (int j = 0; j < counts[0].size(); j++){
+      if (j != counts[0].size() - 1)
+	outfile << counts[j][i] << " ";
+      else
+        outfile << counts[j][i] << "\n";
+    }
+  }
+}
+
 
 template class Histogram2D<double>;
 template class Histogram2D<int>;

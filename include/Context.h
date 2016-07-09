@@ -24,8 +24,14 @@ struct Context{
   int DiskParticleType;
   int BulgeParticleType;
   int MultipleGalaxies;
+  int RGridRes;
+  int XGridRes;
+  int YGridRes;
+  int ZGridRes;
 
   std::string SnapshotBase;
+  std::string PathToGnuplot;
+  std::string DensityPalette;
   std::string GalaxyList;
 };
 

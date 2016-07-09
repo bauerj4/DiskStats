@@ -8,3 +8,8 @@ Dependencies:
 GSL (after and including 1.16)
 FFTW 3
 gnuplot (if plots are wanted)
+
+This project for some good palettes:
+https://github.com/Gnuplotting/gnuplot-palettes
+
+Credit to Anna Schneider for porting these.
