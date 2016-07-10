@@ -215,19 +215,20 @@ void Galaxy::CenterOnDiskCentroid(){
 */
 
 double Galaxy::ComputeVirialRatio(){
-  double potential, kinetic, ratio;
+  double potential, kinetic, ratio, total_energy;
 
   potential = kinetic = 0.;
 
   for (int i = 0; i < myHalo.P.size(); i++){
     if (Global::context.ComovingIntegration == 1){
-      potential += 0.5 * myHalo.P[i]->M() * myHalo.P[i]->Potential();
+      potential += 0.5 * myHalo.P[i]->M() * myHalo.P[i]->Potential() \
+	* pow(Global::newSnap->Time(), -2.);
       kinetic += 0.5 * myHalo.P[i]->M() * myHalo.P[i]->VelX() \
-	* myHalo.P[i]->VelX() * pow(Global::newSnap->Time(),3.);
+	* myHalo.P[i]->VelX() * pow(Global::newSnap->Time(),1.0);
       kinetic += 0.5 * myHalo.P[i]->M() * myHalo.P[i]->VelY() \
-	* myHalo.P[i]->VelY() * pow(Global::newSnap->Time(),3.);
+	* myHalo.P[i]->VelY() * pow(Global::newSnap->Time(),1.0);
       kinetic += 0.5 * myHalo.P[i]->M() * myHalo.P[i]->VelZ() \
-	* myHalo.P[i]->VelZ() * pow(Global::newSnap->Time(),3.);
+	* myHalo.P[i]->VelZ() * pow(Global::newSnap->Time(),1.0);
     }
     else{
       potential += 0.5 * myHalo.P[i]->M() * myHalo.P[i]->Potential();
@@ -239,13 +240,14 @@ double Galaxy::ComputeVirialRatio(){
 
   for (int i = 0; i < myDisk.P.size(); i++){
     if (Global::context.ComovingIntegration == 1){
-      potential += 0.5 * myDisk.P[i]->M() * myDisk.P[i]->Potential();
+      potential += 0.5 * myDisk.P[i]->M() * myDisk.P[i]->Potential() \
+	* pow(Global::newSnap->Time(), -2.);
       kinetic += 0.5 * myDisk.P[i]->M() * myDisk.P[i]->VelX() \
-        * myDisk.P[i]->VelX() * pow(Global::newSnap->Time(),3.);
+        * myDisk.P[i]->VelX() * pow(Global::newSnap->Time(),1.0);
       kinetic += 0.5 * myDisk.P[i]->M() * myDisk.P[i]->VelY() \
-        * myDisk.P[i]->VelY() * pow(Global::newSnap->Time(),3.);
+        * myDisk.P[i]->VelY() * pow(Global::newSnap->Time(),1.0);
       kinetic += 0.5 * myDisk.P[i]->M() * myDisk.P[i]->VelZ() \
-        * myDisk.P[i]->VelZ() * pow(Global::newSnap->Time(),3.);
+        * myDisk.P[i]->VelZ() * pow(Global::newSnap->Time(),1.0);
     }
     else{
       potential += 0.5 * myDisk.P[i]->M() * myDisk.P[i]->Potential();
@@ -258,13 +260,14 @@ double Galaxy::ComputeVirialRatio(){
   for (int i = 0; i < myBulge.P.size(); i++){
 
     if (Global::context.ComovingIntegration == 1){
-      potential += 0.5 * myBulge.P[i]->M() * myBulge.P[i]->Potential();
+      potential += 0.5 * myBulge.P[i]->M() * myBulge.P[i]->Potential() *\
+	pow(Global::newSnap->Time(), -2.);
       kinetic += 0.5 * myBulge.P[i]->M() * myBulge.P[i]->VelX() \
-        * myBulge.P[i]->VelX() * pow(Global::newSnap->Time(),3.);
+        * myBulge.P[i]->VelX() * pow(Global::newSnap->Time(),1.0);
       kinetic += 0.5 * myBulge.P[i]->M() * myBulge.P[i]->VelY() \
-        * myBulge.P[i]->VelY() * pow(Global::newSnap->Time(),3.);
+        * myBulge.P[i]->VelY() * pow(Global::newSnap->Time(),1.0);
       kinetic += 0.5 * myBulge.P[i]->M() * myBulge.P[i]->VelZ() \
-        * myBulge.P[i]->VelZ() * pow(Global::newSnap->Time(),3.);
+        * myBulge.P[i]->VelZ() * pow(Global::newSnap->Time(),1.0);
     }
     else{
       potential += 0.5 * myBulge.P[i]->M() * myBulge.P[i]->Potential();
@@ -274,6 +277,10 @@ double Galaxy::ComputeVirialRatio(){
     }
   }
 
+  std::cout << "Time: " << Global::newSnap->Time() << std::endl;
+  std::cout << "Total Energy: " << potential + kinetic << std::endl;
+  std::cout << "Potential Energy: " << potential << std::endl;
+  std::cout << "Kinetic Energy: " << kinetic << std::endl;
   ratio = potential / (2. * kinetic);
   return ratio;
 }

@@ -9,6 +9,7 @@ SRC 	 = src/Main.cpp src/Snapshot.cpp src/ReadParameterFile.cpp src/Globals.cpp 
 make:
 	python make_macros.py
 	$(CC) $(CFLAGS) $(SRC) -std=c++11 -Wall -O3 -lm -fopenmp -o bin/DiskStats++
+	$(CC) Scripts/merge_ics.cpp -o bin/merge_ics
 
 clean:
 	rm *~ src/*.o src/*~ include/*.o include/*~ bin/* \#* src/\#* include/\#* bin/\#* \
