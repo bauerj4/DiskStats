@@ -6,6 +6,7 @@
 #include <string>
 #include <math.h>
 #include <cstdlib>
+#include <stdio.h>
 
 /*
   Conversion script adapted from DiskStats code
@@ -161,6 +162,7 @@ void Snapshot::LoadGadget2(char * FILENAME, int n_snaps){
 
   fread(&gadgetFortranBuffer, 4, 1, file);
 
+  std::cout << "Buffer = "<< gadgetFortranBuffer << std::endl;
   // Read the header
 
   fread(&header, sizeof(Gadget_Header), 1, file);
@@ -175,6 +177,7 @@ void Snapshot::LoadGadget2(char * FILENAME, int n_snaps){
   // Read Fortran block buffer
   
   fread(&gadgetFortranBuffer, 4, 1, file);
+  std::cout << "Buffer = "<< gadgetFortranBuffer << std::endl;
 
   /*
     Position block
@@ -185,6 +188,7 @@ void Snapshot::LoadGadget2(char * FILENAME, int n_snaps){
   // Read Fortran block buffer
 
   fread(&gadgetFortranBuffer, 4, 1, file);
+  std::cout << "Buffer = "<< gadgetFortranBuffer << std::endl;
 
   // Read the positions
 
@@ -194,6 +198,11 @@ void Snapshot::LoadGadget2(char * FILENAME, int n_snaps){
     newPos[0] = (double) empty3Array[0];
     newPos[1] = (double) empty3Array[1];
     newPos[2] = (double) empty3Array[2];
+
+    if (newPos[0] != newPos[0] || newPos[1] != newPos[1] || newPos[2] != newPos[2]){
+      std::cout << "NaN in positions." << std::endl;
+      exit(2);
+    }
     Positions.push_back(newPos);
     //    std::cout << "p = [" << newPos[0] << "," << newPos[1] << "," << newPos[2] << "]" << std::endl;
   }
@@ -201,6 +210,7 @@ void Snapshot::LoadGadget2(char * FILENAME, int n_snaps){
   // Read Fortran block buffer
 
   fread(&gadgetFortranBuffer, 4, 1, file);
+  std::cout << "Buffer = "<< gadgetFortranBuffer << std::endl;
 
 
   /*
@@ -213,6 +223,7 @@ void Snapshot::LoadGadget2(char * FILENAME, int n_snaps){
   // Read Fortran block buffer
 
   fread(&gadgetFortranBuffer, 4, 1, file);
+  std::cout << "Buffer = "<< gadgetFortranBuffer << std::endl;
 
   // Get velocities 
 
@@ -229,6 +240,7 @@ void Snapshot::LoadGadget2(char * FILENAME, int n_snaps){
   // Read Fortran block buffer
 
   fread(&gadgetFortranBuffer, 4, 1, file);
+  std::cout << "Buffer = "<< gadgetFortranBuffer << std::endl;
 
   /*
     Get IDs
@@ -239,6 +251,7 @@ void Snapshot::LoadGadget2(char * FILENAME, int n_snaps){
   // Read Fortran block buffer
 
   fread(&gadgetFortranBuffer, 4, 1, file);
+  std::cout << "Buffer = "<< gadgetFortranBuffer << std::endl;
 
   // Get IDs
 
@@ -252,6 +265,7 @@ void Snapshot::LoadGadget2(char * FILENAME, int n_snaps){
   // Read Fortran block buffer
 
   fread(&gadgetFortranBuffer, 4, 1, file);
+  std::cout << "Buffer = "<< gadgetFortranBuffer << std::endl;
 
   /*
     Masses if needed
@@ -269,6 +283,7 @@ void Snapshot::LoadGadget2(char * FILENAME, int n_snaps){
     // Read Fortran buffer
 
     fread(&gadgetFortranBuffer, 4, 1, file);
+    std::cout << "Buffer = "<< gadgetFortranBuffer << std::endl;
 
     // Get masses
 
@@ -298,6 +313,7 @@ void Snapshot::LoadGadget2(char * FILENAME, int n_snaps){
     // Read Fortran buffer
 
     fread(&gadgetFortranBuffer, 4, 1, file);
+    std::cout << "Buffer = "<< gadgetFortranBuffer << std::endl;
 
     
 
@@ -404,9 +420,11 @@ void Snapshot::PrintGadget2Header(){
 
 void Snapshot::WriteGadget2(char * FILE_PATH){
   int gadgetFortranBuffer;
-  std::string x,y,z,vx,vy,vz;
+  //std::string x,y,z,vx,vy,vz;
+  float x,y,z,vx,vy,vz,m;
   // The out stream
-  std::ofstream outFile (FILE_PATH, std::ios::out | std::ios::binary);
+  //std::ofstream outFile (FILE_PATH, std::ios::out | std::ios::binary);
+  FILE * fp = fopen(FILE_PATH, "wb");
 
   /*
     Block 1 (header)
@@ -417,26 +435,44 @@ void Snapshot::WriteGadget2(char * FILE_PATH){
   // Gadget expects the size of the block
   gadgetFortranBuffer = sizeof(header);
   
-  outFile.write((char*)&gadgetFortranBuffer, sizeof(int));
-  outFile.write((char*)&header, sizeof(header));
-  outFile.write((char*)&gadgetFortranBuffer, sizeof(int));
+  
+  fwrite(&gadgetFortranBuffer, 4, 1, fp);
+  fwrite(&header, sizeof(header), 1, fp);
+  fwrite(&gadgetFortranBuffer, 4, 1, fp);
+
+  //outFile.write((char*)&gadgetFortranBuffer, sizeof(int));
+  //outFile.write((char*)&header, sizeof(header));
+  //outFile.write((char*)&gadgetFortranBuffer, sizeof(int));
 
   /*
     Block 2 (positions)
   */
   std::cout << "Writing block 2: Positions" << std::endl;
 
-  gadgetFortranBuffer = (3 * sizeof(float) * Positions.size());  
-  outFile.write((char*)&gadgetFortranBuffer, sizeof(int));
+  gadgetFortranBuffer = (3 * 4 * Positions.size());  
+  //outFile.write((char*)&gadgetFortranBuffer, 4);
+  fwrite(&gadgetFortranBuffer, 4, 1, fp);
+
   for (int i = 0; i < Positions.size(); i++){
-    x = Positions[i][0];
-    y = Positions[i][1];
-    z = Positions[i][2];
-    outFile.write((char*)&x, sizeof(float));
-    outFile.write((char*)&y, sizeof(float));
-    outFile.write((char*)&z, sizeof(float));
+    x = (float)Positions[i][0];
+    y = (float)Positions[i][1];
+    z = (float)Positions[i][2];
+    fwrite(&x, 4, 1, fp);
+    fwrite(&y, 4, 1, fp);
+    fwrite(&z, 4, 1, fp);
+
+    //outFile.write((char*)&x, 4);
+    //outFile.write((char*)&y, 4);
+    //outFile.write((char*)&z, 4);
+
+    //std::cout << "x: " << x << std::endl;
+    //std::cout << "y: " << y << std::endl;
+    //std::cout << "z: " << z << std::endl;
+
   }
-  outFile.write((char*)&gadgetFortranBuffer, sizeof(int));
+  //outFile.write((char*)&gadgetFortranBuffer, 4);
+  fwrite(&gadgetFortranBuffer, 4, 1, fp);
+
 
   /*
     Block 3 (velocities)
@@ -444,17 +480,25 @@ void Snapshot::WriteGadget2(char * FILE_PATH){
 
   std::cout << "Writing block 3: Velocities" << std::endl;
 
-  gadgetFortranBuffer = (3 * sizeof(float) * Velocities.size());
-  outFile.write((char*)&gadgetFortranBuffer, sizeof(int));
+  gadgetFortranBuffer = (3 * 4 * Velocities.size());
+  //outFile.write((char*)&gadgetFortranBuffer, 4);
+  fwrite(&gadgetFortranBuffer, 4, 1, fp);
+
   for (int i = 0; i < Velocities.size(); i++){
-    vx = Velocities[i][0];
-    vy = Velocities[i][1];
-    vz = Velocities[i][2];
-    outFile.write((char*)&vx, sizeof(float));
-    outFile.write((char*)&vy, sizeof(float));
-    outFile.write((char*)&vz, sizeof(float));
+    vx = (float)Velocities[i][0];
+    vy = (float)Velocities[i][1];
+    vz = (float)Velocities[i][2];
+    //outFile.write((char*)&vx, 4);
+    //outFile.write((char*)&vy, 4);
+    //outFile.write((char*)&vz, 4);
+    fwrite(&vx, 4, 1, fp);
+    fwrite(&vy, 4, 1, fp);
+    fwrite(&vz, 4, 1, fp);
   }
-  outFile.write((char*)&gadgetFortranBuffer, sizeof(int));
+
+  //outFile.write((char*)&gadgetFortranBuffer, 4);
+  fwrite(&gadgetFortranBuffer, 4, 1, fp);
+
   
   /*
     Block 4 (IDs)
@@ -462,12 +506,18 @@ void Snapshot::WriteGadget2(char * FILE_PATH){
 
   std::cout << "Writing block 4: IDs" << std::endl;
   
-  gadgetFortranBuffer = (sizeof(int) * IDs.size());
-  outFile.write((char*)&gadgetFortranBuffer, sizeof(int));
+  gadgetFortranBuffer = (4 * IDs.size());
+  //outFile.write((char*)&gadgetFortranBuffer, 4);
+  fwrite(&gadgetFortranBuffer, 4, 1, fp);
+
   for (int i = 0; i < IDs.size(); i++){
-    outFile.write((char*)&IDs[i], sizeof(int));
+    //outFile.write((char*)&IDs[i], 4);
+    fwrite(&IDs[i], 4, 1, fp);
+    std::cout << i << std::endl;
   }
-  outFile.write((char*)&gadgetFortranBuffer, sizeof(int));
+  //outFile.write((char*)&gadgetFortranBuffer, 4);
+  fwrite(&gadgetFortranBuffer, 4, 1, fp);
+
 
   /*
     Block 5 (masses)
@@ -475,14 +525,20 @@ void Snapshot::WriteGadget2(char * FILE_PATH){
 
   std::cout << "Writing block 5: Masses" << std::endl;
 
-  gadgetFortranBuffer =(sizeof(float) * IDs.size());
-  outFile.write((char*)&gadgetFortranBuffer, sizeof(int));
-  for (int i = 0; i < Masses.size(); i++){
-    outFile.write((char*)&Masses[i], sizeof(float));
-  }
-  outFile.write((char*)&gadgetFortranBuffer, sizeof(int));
+  gadgetFortranBuffer =(4 * IDs.size());
+  //outFile.write((char*)&gadgetFortranBuffer, 4);
+  fwrite(&gadgetFortranBuffer, 4, 1, fp);
 
-  outFile.close();
+  for (int i = 0; i < Masses.size(); i++){
+    //outFile.write((char*)&Masses[i], 4);
+    m = Masses[i];
+    fwrite(&m, 4, 1, fp);
+  }
+  //outFile.write((char*)&gadgetFortranBuffer, 4);
+  fwrite(&gadgetFortranBuffer, 4, 1, fp);
+
+  //outFile.close();
+  fclose(fp);
 }
 
 
@@ -526,6 +582,9 @@ void Snapshot::AppendDiskParticles(std::vector<double> &disk_x, std::vector<doub
 
   std::cout << "Size of new velocities is " << newVel.size() << std::endl;
 
+  nparts += disk_x.size();
+
+
   for (int i = 0; i < nparts; i++){
     newIDs.push_back(i + 1);
   }
@@ -535,7 +594,7 @@ void Snapshot::AppendDiskParticles(std::vector<double> &disk_x, std::vector<doub
   }
 
   header.npart[2] += disk_x.size();
-  nparts += disk_x.size();
+  //nparts += disk_x.size();
   header.mpart_arr[0] = header.mpart_arr[1] = header.mpart_arr[2] \
     = header.mpart_arr[3] = header.mpart_arr[4] = header.mpart_arr[5] = 0.;
 
@@ -664,9 +723,9 @@ int main(int argc, char ** argv){
     disk_vy.push_back(atof(vy.c_str()) * 100. / pow(timeFromRedshift,0.5));
     disk_vz.push_back(atof(vz.c_str()) * 100. / pow(timeFromRedshift,0.5));
     disk_ids.push_back(id);
-    std::cout << disk_x[id-1] << " " << disk_y[id - 1] << " " << " " << disk_z[id - 1] \
-	      <<  " " << disk_vx[id-1] <<  " "  << disk_vy[id-1] << " " <<  disk_vz[id-1] \
-	      << " " << disk_m[id-1] << std::endl;
+    //    std::cout << disk_x[id-1] << " " << disk_y[id - 1] << " " << " " << disk_z[id - 1] \
+    //	      <<  " " << disk_vx[id-1] <<  " "  << disk_vy[id-1] << " " <<  disk_vz[id-1] \
+    //	      << " " << disk_m[id-1] << std::endl;
     id++;
   }
   std::cout << "Disk file read." << std::endl;
