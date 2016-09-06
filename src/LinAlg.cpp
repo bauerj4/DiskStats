@@ -12,6 +12,39 @@
 
 
 /*
+  Rotate into original system frame
+*/
+
+/*
+  Rotate into disk frame
+*/
+
+/*
+  Generate Euler matrix from specified axis.
+*/
+
+/*
+  Return the eigenvalues and eigenvectors as a
+  N + 1 X N matrix.  The first row will contain the
+  vector magnitudes of columns 1,2, ... N, and
+  the last N columns will be the corresponding 
+  normalised eigenvectors.  Use FSM algorithm.
+*/
+
+
+/*
+  Scalar multiply a matrix
+*/
+
+/*
+  Return the inner product of two vectors
+*/
+
+/*
+  Return the outer product of two vectors
+*/
+
+/*
   This function acts similarly to NumPy's linspace,
   but it returns an array of length n+1 (containing
   both boundaries a and b).

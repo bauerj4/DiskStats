@@ -46,6 +46,12 @@ namespace Global{
     Prototypes for global functions
   */
 
+  void RotateToBoxFrame(std::vector<double> &x, std::vector<std::vector<double> > &A);
+  void RotateToDiskFrame(std::vector<double> &x, std::vector<std::vector<double> > &A);
+  std::vector<std::vector<double> > EulerMatrix(std::vector<double> &a);
+  std::vector<std::vector<double> > Eigenspace(std::vector<std::vector<double> > &A);
+  double Dot(std::vector<double> &a, std::vector<double> &b);
+  double Outer(std::vector<double> &a, std::vector<double> &b);
   std::vector<double> LinearSpacing(double a, double b, int n);
 
   void ReadParameterFile(char * FILENAME);

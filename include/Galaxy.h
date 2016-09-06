@@ -4,6 +4,7 @@
 #include "Compile_Time_Options.h"
 #include "Components.h"
 #include "Snapshot.h"
+#include <vector>
 
 class Galaxy{
  private:
@@ -11,6 +12,7 @@ class Galaxy{
   Bulge myBulge;
   Halo myHalo;
   int num;
+  std::vector<std::vector<double> > diskMofI;
 
  public:
   // Constructor
@@ -20,6 +22,7 @@ class Galaxy{
 
   // Center on disk via shrinking sphere of centroids
   void CenterOnDiskCentroid();
+  void AlignToMinorAxis();
   double ComputeVirialRatio();
   std::vector<double> GetDiskXs();
   std::vector<double> GetDiskYs();

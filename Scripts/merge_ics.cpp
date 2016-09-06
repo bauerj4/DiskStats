@@ -17,7 +17,9 @@
 #define GADGET2        // Currently no support for non-Gadget codes
 #define USE_POTENTIALS // Comment this out if your snapshot
                        // doesn't have these
-
+#define GADGET_COSMOLOGY
+#define  REASSIGN // Use if disk particles are in halo snap
+//#define APPEND    // Use if disk particles need to be added
 
 /*
   Class header for a single particle
@@ -513,7 +515,7 @@ void Snapshot::WriteGadget2(char * FILE_PATH){
   for (int i = 0; i < IDs.size(); i++){
     //outFile.write((char*)&IDs[i], 4);
     fwrite(&IDs[i], 4, 1, fp);
-    std::cout << i << std::endl;
+    //std::cout << i << std::endl;
   }
   //outFile.write((char*)&gadgetFortranBuffer, 4);
   fwrite(&gadgetFortranBuffer, 4, 1, fp);
@@ -577,13 +579,17 @@ void Snapshot::AppendDiskParticles(std::vector<double> &disk_x, std::vector<doub
     newVector[0] = disk_vx[i];
     newVector[1] = disk_vy[i];
     newVector[2] = disk_vz[i];
+
+#ifdef GADGET_COSMOLOGY
+#endif
     newVel.push_back(newVector);
   }
 
   std::cout << "Size of new velocities is " << newVel.size() << std::endl;
 
+#ifdef APPEND
   nparts += disk_x.size();
-
+#endif
 
   for (int i = 0; i < nparts; i++){
     newIDs.push_back(i + 1);
@@ -593,20 +599,44 @@ void Snapshot::AppendDiskParticles(std::vector<double> &disk_x, std::vector<doub
     newM.push_back(disk_m[i]);
   }
 
+#ifdef APPEND
   header.npart[2] += disk_x.size();
-  //nparts += disk_x.size();
+  nparts += disk_x.size();
   header.mpart_arr[0] = header.mpart_arr[1] = header.mpart_arr[2] \
     = header.mpart_arr[3] = header.mpart_arr[4] = header.mpart_arr[5] = 0.;
 
   std::cout << "Arrays constructed. Merging IDs..." << std::endl;
 
   IDs = newIDs;
+#endif
 
-  std::cout << "Merging masses... " << std::endl;
+#ifdef REASSIGN
+  std::cout << "Merging arrays... " << std::endl;
+  int j = 0;
+
+ 
+  std::cout << "Reassigning stats to " \
+	    << header.npart[2] << " particles" << std::endl;
+  for (int i = header.npart[1] + header.npart[0];\
+       i < header.npart[0] + header.npart[1] +  header.npart[2];\
+       i++){
+    j = i - header.npart[1] - header.npart[0];
+
+    //std::cout << i << std::endl;
+    //std::cout << j << std::endl;
+
+    Masses[i] = newM[j];
+    Positions[i] = newPos[j];
+    Velocities[i] = newVel[j];
+  }
+  
+#endif
+
+#ifdef APPEND
   it = Masses.begin();
   Masses.insert(it+npartsBeforeDisk, newM.begin(), newM.end());
   std::cout << "New mass vector of length " << Masses.size() << std::endl;
-
+  
 
   std::cout << "Merging positions... " << std::endl;
   it2 = Positions.begin();
@@ -617,7 +647,7 @@ void Snapshot::AppendDiskParticles(std::vector<double> &disk_x, std::vector<doub
   it2 = Velocities.begin();
   Velocities.insert(it2+npartsBeforeDisk, newVel.begin(), newVel.end());
   std::cout << "New velocity vector of length " << Velocities.size() << std::endl;
-
+#endif
 
   std::cout << "Arrays reconstructed." << std::endl;
 }
@@ -716,12 +746,12 @@ int main(int argc, char ** argv){
 
 
     disk_m.push_back(atof(m.c_str()) * massUnitConversion);
-    disk_x.push_back(atof(x.c_str()) / timeFromRedshift);
-    disk_y.push_back(atof(y.c_str()) / timeFromRedshift);
-    disk_z.push_back(atof(z.c_str()) / timeFromRedshift);
-    disk_vx.push_back(atof(vx.c_str()) * 100. / pow(timeFromRedshift,0.5));
-    disk_vy.push_back(atof(vy.c_str()) * 100. / pow(timeFromRedshift,0.5));
-    disk_vz.push_back(atof(vz.c_str()) * 100. / pow(timeFromRedshift,0.5));
+    disk_x.push_back(atof(x.c_str()));
+    disk_y.push_back(atof(y.c_str()));
+    disk_z.push_back(atof(z.c_str()));
+    disk_vx.push_back(atof(vx.c_str()) * 100. / (pow(timeFromRedshift,0.5) * 0.679));
+    disk_vy.push_back(atof(vy.c_str()) * 100. / (pow(timeFromRedshift,0.5) * 0.679));
+    disk_vz.push_back(atof(vz.c_str()) * 100. / (pow(timeFromRedshift,0.5) * 0.679));
     disk_ids.push_back(id);
     //    std::cout << disk_x[id-1] << " " << disk_y[id - 1] << " " << " " << disk_z[id - 1] \
     //	      <<  " " << disk_vx[id-1] <<  " "  << disk_vy[id-1] << " " <<  disk_vz[id-1] \

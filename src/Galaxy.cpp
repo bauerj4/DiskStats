@@ -28,6 +28,14 @@ Galaxy::Galaxy(double x, double y, double z, double r, Snapshot * snap){
   np = snap->NParts();
   n_disk = n_bulge = n_halo = n_galaxy = 0;
 
+  /*
+    Initialize empty MofI
+  */
+  for (int axis = 0; axis < 3; axis++){
+    std::vector<double> newVector(3,0);
+    diskMofI.push_back(newVector);
+  }
+
   std::cout << "\n" << std::endl;
   std::cout << "Constructing galaxy with approximate position r = [" << x <<","<< y << ","<< z <<"]" << std::endl;
   for (int i = 0; i < np; i++){
@@ -208,6 +216,16 @@ void Galaxy::CenterOnDiskCentroid(){
   
 }
 
+/*
+  Compute the disk moment of inertia;
+  Align the system to the disk minor axis.
+*/
+
+void Galaxy::AlignToMinorAxis(){
+  std::vector<std::vector<double> > rOuterProduct;
+  std::vector<std::vector<double> > rInnerProduct;
+
+}
 
 
 /*
