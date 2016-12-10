@@ -21,6 +21,8 @@ class Particle{
 
   Particle(std::vector<double> &p, std::vector<double> &v, double m, double rho, double pot, int id, int t);
 
+  std::vector<double> R();
+  std::vector<double> V();
 
   double PosX(){return Pos[0];}
   double PosY(){return Pos[1];}
@@ -33,6 +35,11 @@ class Particle{
   double Potential(){return Pot;}
   double M(){return Mass;}
 
+  int MyID(){return ID;}
+
+
+  void SetPos(std::vector<double> &p);
+  void SetVel(std::vector<double> &v);
   /*
     Add to position or velocity vectors
   */
@@ -43,7 +50,7 @@ class Particle{
     Rotation operations
   */
   
-  void Rotate3(std::vector<std::vector<double> > &Euler);
+  void Rotate3();
   
 };
 

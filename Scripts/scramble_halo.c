@@ -7,6 +7,7 @@
 #include <math.h>
 #include <cstdlib>
 #include <stdio.h>
+//#include <crandom.h>
 
 /*
   Conversion script adapted from DiskStats code
@@ -93,10 +94,9 @@ class Snapshot{
 
   void LoadGadget2(char * FILE_PATH, int n_files); // Multiple snaps not supported
   void WriteGadget2(char * FILE_PATH);
-  void AppendDiskParticles(std::vector<double> &disk_x, std::vector<double> &disk_y, \
-			   std::vector<double> &disk_z, std::vector<double> &disk_vx, \
-			   std::vector<double> &disk_vy, std::vector<double> &disk_vz,\
-			   std::vector<double> &disk_m, std::vector<int> &disk_ids);
+  void ScrambleHalo(double X0, double Y0, double Z0,\
+		    double VX0, double VY0, double VZ0, \
+		    double a, char * out);
 
 
   /*
@@ -545,148 +545,134 @@ void Snapshot::WriteGadget2(char * FILE_PATH){
 
 
 /*
-  Add disk particles
+  "Sphericalize" halo by resampling cos(theta) and phi
+  for halo particle positions and velocities.
 */
 
-void Snapshot::AppendDiskParticles(std::vector<double> &disk_x, std::vector<double> &disk_y, \
-				   std::vector<double> &disk_z, std::vector<double> &disk_vx, \
-				   std::vector<double> &disk_vy, std::vector<double> &disk_vz,\
-				   std::vector<double> &disk_m, std::vector<int> &disk_ids){
-  std::vector<std::vector<double> > newPos;
-  std::vector<std::vector<double> > newVel;
-  std::vector<double> newM;
-  std::vector<int> newIDs;
-  std::vector<double>::iterator it;
-  std::vector<std::vector<double> >::iterator it2;
-  std::vector<int>::iterator it3;
-  int npartsBeforeDisk;
-  int npartsAfterDisk;
+double Uniform(double min, double max);
+double Uniform(double min, double max){
+  double random;
+  random = ((double) rand()) / ((double) RAND_MAX);
 
-  npartsBeforeDisk = header.npart[0] + header.npart[1];
+  // Now include the range
+  random *= max - min;
+  random += min;
+  return random;
+}
 
-  for (int i = 0; i < disk_x.size(); i++){
-    std::vector<double> newVector(3,0);
-    newVector[0] = disk_x[i];
-    newVector[1] = disk_y[i];
-    newVector[2] = disk_z[i];
-    newPos.push_back(newVector);
+void Snapshot::ScrambleHalo(double X0, double Y0, double Z0,\
+			    double VX0, double VY0, double VZ0,\
+			    double time, char * out){
+  double r, v, r2, v2, rand, cosTheta, theta, phi, x,y,z,vx,vy,vz,vr2,vt2,vt,vr, sgn;
+  std::vector<double> vTan(3,0);
+  std::vector<double> vRad(3,0);
+  std::vector<double> vTanNew(3,0);
+  std::vector<double> vRadNew(3,0);
+
+  std::vector<double> X;
+  std::vector<double> Y;
+  std::vector<double> Z;
+  std::vector<double> VX;
+  std::vector<double> VY;
+  std::vector<double> VZ;
+  std::ofstream haloOut(out);
+
+  haloOut << header.npart[1] << " " << "0.000000" << std::endl;
+
+  for (unsigned int i = header.npart[0]; i < header.npart[1]; i++){
+    r2 = (Positions[i][0] - X0) * (Positions[i][0] - X0) + (Positions[i][1] - Y0) * (Positions[i][1]  - Y0) \
+      + (Positions[i][2] - Z0) * (Positions[i][2] - Z0);
+    v2 = Velocities[i][0] * Velocities[i][0] + Velocities[i][1] * Velocities[i][1]\
+      + Velocities[i][2] * Velocities[i][2];
+
+    r = pow(r2,0.5);
+    v = pow(v2,0.5);
+
+    vRad[0] = (Positions[i][0] - X0) * Velocities[i][0] / r;
+    vRad[1] = (Positions[i][1] - Y0) * Velocities[i][1] / r;
+    vRad[2] = (Positions[i][2] - Z0) * Velocities[i][2] / r;
+    sgn = (vRad[0] + vRad[1] + vRad[2])/fabs(vRad[0] + vRad[1] + vRad[2]);
+
+    vTan[0] = Velocities[i][0] - vRad[0];
+    vTan[1] = Velocities[i][1] - vRad[1];
+    vTan[2] = Velocities[i][2] - vRad[2];
+
+    vr2 = vRad[0] * vRad[0] + vRad[1] * vRad[1] + vRad[2] * vRad[2]; 
+    vt2 = vTan[0] * vTan[0] + vTan[1] * vTan[1] + vTan[2] * vTan[2];
+
+    vr = pow(vr2, 0.5);
+    vt = pow(vt2, 0.5);
+
+    // Only sphericalize particles in halo
+    if (r < 500.){
+      
+      cosTheta = Uniform(-1,1);
+      phi      = Uniform(0., 2. * M_PI);
+      theta    = acos(cosTheta);
+      
+      x = r * sin(theta) * cos(phi);
+      y = r * sin(theta) * sin(phi);
+      z = r * cosTheta;
+      
+      cosTheta = Uniform(-1,1);
+      phi      = Uniform(0., 2. * M_PI);
+      theta    = acos(cosTheta);
+      
+      vx = vt * sin(theta) * cos(phi);
+      vy = vt * sin(theta) * sin(phi);
+      vz = vt * cosTheta;
+
+      vx += vr * sgn * x/r;
+      vy += vr * sgn * y/r;
+      vz += vr * sgn * z/r;
+
+      X.push_back(x);
+      Y.push_back(y);
+      Z.push_back(z);
+      
+      VX.push_back(vx);
+      VY.push_back(vy);
+      VZ.push_back(vz);
+      
+      Positions[i][0] = x + X0;
+      Positions[i][1] = y + Y0;
+      Positions[i][2] = z + Z0;
+      
+      Velocities[i][0] = (vx + VX0 * pow(time,-1.5));
+      Velocities[i][1] = (vy + VY0 * pow(time,-1.5));
+      Velocities[i][2] = (vz + VZ0 * pow(time,-1.5));
+      
+      // Now write us a text file
+      haloOut << Masses[i] <<  " " << x << " " << y << " " << z		\
+	      << " " << vx << " " << vy << " " << vz << std::endl;
+    }
   }
-
-  std::cout << "Size of new positions is " << newPos.size() << std::endl;
-
-  for (int i = 0; i < disk_vx.size(); i++){
-    std::vector<double> newVector(3,0);
-    newVector[0] = disk_vx[i];
-    newVector[1] = disk_vy[i];
-    newVector[2] = disk_vz[i];
-
-#ifdef GADGET_COSMOLOGY
-#endif
-    newVel.push_back(newVector);
-  }
-
-  std::cout << "Size of new velocities is " << newVel.size() << std::endl;
-
-#ifdef APPEND
-  nparts += disk_x.size();
-#endif
-
-  for (int i = 0; i < nparts; i++){
-    newIDs.push_back(i + 1);
-  }
-
-  for (int i = 0; i < disk_m.size(); i++){
-    newM.push_back(disk_m[i]);
-  }
-
-#ifdef APPEND
-  header.npart[2] += disk_x.size();
-  nparts += disk_x.size();
-  header.mpart_arr[0] = header.mpart_arr[1] = header.mpart_arr[2] \
-    = header.mpart_arr[3] = header.mpart_arr[4] = header.mpart_arr[5] = 0.;
-
-  std::cout << "Arrays constructed. Merging IDs..." << std::endl;
-
-  IDs = newIDs;
-#endif
-
-#ifdef REASSIGN
-  std::cout << "Merging arrays... " << std::endl;
-  int j = 0;
-
- 
-  std::cout << "Reassigning stats to " \
-	    << header.npart[2] << " particles" << std::endl;
-  for (int i = header.npart[1] + header.npart[0];\
-       i < header.npart[0] + header.npart[1] +  header.npart[2];\
-       i++){
-    j = i - header.npart[1] - header.npart[0];
-
-    //std::cout << i << std::endl;
-    //std::cout << j << std::endl;
-
-    Masses[i] = newM[j];
-    Positions[i] = newPos[j];
-    Velocities[i] = newVel[j];
-  }
-  
-#endif
-
-#ifdef APPEND
-  it = Masses.begin();
-  Masses.insert(it+npartsBeforeDisk, newM.begin(), newM.end());
-  std::cout << "New mass vector of length " << Masses.size() << std::endl;
-  
-
-  std::cout << "Merging positions... " << std::endl;
-  it2 = Positions.begin();
-  Positions.insert(it2+npartsBeforeDisk, newPos.begin(), newPos.end());
-  std::cout << "New position vector of length " << Positions.size() << std::endl;
-  
-  std::cout << "Merging velocities... " << std::endl;
-  it2 = Velocities.begin();
-  Velocities.insert(it2+npartsBeforeDisk, newVel.begin(), newVel.end());
-  std::cout << "New velocity vector of length " << Velocities.size() << std::endl;
-#endif
-
-  std::cout << "Arrays reconstructed." << std::endl;
 }
 
 /*
   Main loop
 */
 int main(int argc, char ** argv){
-  double timeFromRedshift, massUnitConversion;
+  double timeFromRedshift, massUnitConversion, X0, Y0, Z0, VX0, VY0, VZ0;
   std::string x,y,z,vx,vy,vz,m;
   char * haloFile;
-  char * diskFile;
   char * outFile;
-  int nHaloParts, nDiskParts;
+  char * outFileASCII;
+  int nHaloParts;
   std::string line;
-  std::vector<double> disk_x,disk_y,disk_z;
-  std::vector<double> disk_vx,disk_vy,disk_vz;
-  std::vector<double> disk_m;
-  std::vector<int> disk_ids;
   Snapshot * snap;
-  std::fstream inDisk;
 
+  srand((unsigned)time(NULL));
 
   haloFile = argv[1];
-  diskFile = argv[2];
-  outFile = argv[3];
-
-
-  try{
-    inDisk.open(diskFile);
-    if (!inDisk.is_open())
-      throw std::exception();
-  }
-  catch (std::exception &e){
-    std::cout << "Could not open disk file.  Check if it exists. " << std::endl;
-    exit(1);
-  }
-
-
+  outFile = argv[2];
+  outFileASCII = argv[3];
+  X0 = atof(argv[4]);
+  Y0 = atof(argv[5]);
+  Z0 = atof(argv[6]);
+  VX0 = atof(argv[7]);
+  VY0 = atof(argv[8]);
+  VZ0 = atof(argv[9]);
 
   massUnitConversion = 1./4.301;
 
@@ -697,81 +683,7 @@ int main(int argc, char ** argv){
   snap = new Snapshot(haloFile,1);
   timeFromRedshift = 1./(1. + snap->Redshift());
   
-  /*
-    The disk file will be in GalactICS ASCII
-  */
-
-  getline(inDisk,line);
-  std::stringstream iss0(line);
-  iss0 >> nDiskParts;
-  
-  //  while (iss0.peek() == ' ')
-    //    iss0 >> nDiskParts;
-  std::cout << "\nReading " << nDiskParts << " disk particles from " << diskFile << std::endl;
-  int id = 1;
-  while (id <= nDiskParts){
-    getline(inDisk,line);
-    std::stringstream iss(line);
-    //std::cout << "reading... " << std::endl;
-    //    std::cout << line;
-    
-    //iss >> m >> x >> y >> z >> vx >> vy >> vz;
-    iss >> m;
-    //    while (iss.peek() == ' ')
-    //      iss >> m;
-
-    iss >> x;
-    //    while (iss.peek() == ' ')
-    //      iss >> x;
-
-    iss >> y;
-    //    while (iss.peek() == ' ')
-    //    iss >> y;
-
-    iss >> z;
-    //  while (iss.peek() == ' ')
-    //    iss >> z;
-
-    iss >> vx;
-    //  while (iss.peek() == ' ')
-    //    iss >> vx;
-
-    iss >> vy;
-    //  while (iss.peek() == ' ')
-    //      iss >> vy;
-
-    iss >> vz;
-    //    while (iss.peek() == ' ')
-    //      iss >> vz;
-
-
-    disk_m.push_back(atof(m.c_str())* massUnitConversion);
-    disk_x.push_back(atof(x.c_str()));
-    disk_y.push_back(atof(y.c_str()));
-    disk_z.push_back(atof(z.c_str()));
-
-#ifdef GADGET_COSMOLOGY
-    disk_vx.push_back(atof(vx.c_str()) * 100. / (pow(timeFromRedshift,1.5)));
-    disk_vy.push_back(atof(vy.c_str()) * 100. / (pow(timeFromRedshift,1.5) ));
-    disk_vz.push_back(atof(vz.c_str()) * 100. / (pow(timeFromRedshift,1.5) ));
-#else
-    disk_vx.push_back(atof(vx.c_str()) * 100.);
-    disk_vy.push_back(atof(vy.c_str()) * 100.);
-    disk_vz.push_back(atof(vz.c_str()) * 100.);
-#endif
-
-    disk_ids.push_back(id);
-    //    std::cout << disk_x[id-1] << " " << disk_y[id - 1] << " " << " " << disk_z[id - 1] \
-    //	      <<  " " << disk_vx[id-1] <<  " "  << disk_vy[id-1] << " " <<  disk_vz[id-1] \
-    //	      << " " << disk_m[id-1] << std::endl;
-    id++;
-  }
-  std::cout << "Disk file read." << std::endl;
-
-  std::cout << "Appending disk particles..." << std::endl;
-
-  snap->AppendDiskParticles(disk_x, disk_y, disk_z, disk_vx,\
-			    disk_vy, disk_vz, disk_m, disk_ids);
+  snap->ScrambleHalo(X0, Y0, Z0, VX0, VY0, VZ0, timeFromRedshift, outFileASCII);
 
   snap->WriteGadget2(outFile);
 

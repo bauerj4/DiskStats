@@ -42,6 +42,8 @@ void Global::ReadParameterFile(char * FILENAME){
       Global::context.OmegaLambda = stod(value);
     else if (option == "HubbleParam")
       Global::context.HubbleParam = stod(value);
+    else if (option == "HaloInnerRad")
+      Global::context.HaloInnerRad = stod(value);
 
     else if (option == "DiskShrinkingSphereRad")
       Global::context.DiskShrinkingSphereRad = stod(value);
@@ -65,6 +67,9 @@ void Global::ReadParameterFile(char * FILENAME){
       Global::context.PeriodicBoundaries = stoi(value);
     else if (option == "NumSnaps")
       Global::context.NumSnaps = stoi(value);
+    else if (option == "StartingSnap")
+      Global::context.StartingSnap = stoi(value);
+
 
     else if (option == "HaloParticleType")
       Global::context.HaloParticleType = stoi(value);
@@ -91,6 +96,8 @@ void Global::ReadParameterFile(char * FILENAME){
       Global::context.PathToGnuplot = value;
     else if (option == "DensityPalette")
       Global::context.DensityPalette = value;
+    else if (option == "DensityPalette2")
+      Global::context.DensityPalette2 = value;
 
 
   }

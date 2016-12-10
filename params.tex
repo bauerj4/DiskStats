@@ -7,11 +7,13 @@
 
 %SnapshotBase     /media/th3pwnguin/x86_linux_storag/scratch/PhD/Cosmological_Disks_w_Denis/transients_tests/spherical_EP_galactics/gadget-3-with-galactics-disks/OUTPUTS/snapshot_
 
-SnapshotBase       ../Cosmological_Disks_w_Denis/transients_tests/full_cosmological_light/live_short/gadget-3-with-galactics-disks/OUTPUTS/snapshot_
+SnapshotBase       ../gadget-3-with-particle-disks/OUTPUTS/snapshot_
 
-NumSnaps           300
+NumSnaps           501
+StartingSnap       250
 PathToGnuplot      ./Plots
 DensityPalette     ./Palettes/parula.pal
+DensityPalette2    ./Palettes/bupu.pal
 HaloParticleType   1
 DiskParticleType   2
 BulgeParticleType  3
@@ -32,6 +34,7 @@ GalaxyX0                0.0
 GalaxyY0                0.0
 GalaxyZ0                0.0
 GalaxyR0                300.0
+HaloInnerRad            40.0
 DiskShrinkingSphereRad  20.0
 DiskShrinkingSphereCut  1.0
 DiskShrinkingSphereRed  2.0

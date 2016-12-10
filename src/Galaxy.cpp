@@ -7,8 +7,12 @@
 
 #include <vector>
 #include <iostream>
+#include <fstream>
 #include <omp.h>
 #include <math.h>
+#include <algorithm>
+
+bool operator< (Particle &a,Particle &b);
 
 /*
   Class constructor
@@ -46,6 +50,16 @@ Galaxy::Galaxy(double x, double y, double z, double r, Snapshot * snap){
     my_vx = snap->VelX(i);
     my_vy = snap->VelY(i);
     my_vz = snap->VelZ(i);
+
+    if (Global::context.ComovingIntegration == 1){
+      my_x *= snap->Time();
+      my_y *= snap->Time();
+      my_z *= snap->Time();
+      
+      my_vx *= pow(snap->Time(), 1.5) / Global::context.HubbleParam;
+      my_vy *= pow(snap->Time(), 1.5) / Global::context.HubbleParam;
+      my_vz *= pow(snap->Time(), 1.5) / Global::context.HubbleParam;
+    }
 
     my_m  = snap->Mass(i);
     my_id = snap->ID(i);
@@ -221,38 +235,100 @@ void Galaxy::CenterOnDiskCentroid(){
   Align the system to the disk minor axis.
 */
 
+#ifdef ROTATE_SYSTEM
 void Galaxy::AlignToMinorAxis(){
-  std::vector<std::vector<double> > rOuterProduct;
-  std::vector<std::vector<double> > rInnerProduct;
+  //std::vector<double> thisPos;
+  //std::vector<double> thisVel;
 
+  std::cout << "Realigning halo...\n";
+  for (int i = 0; i < myHalo.P.size(); i++){
+    myHalo.P[i]->Rotate3();
+    //std::vector<double> thisPos;
+    //std::vector<double> thisVel;
+
+    //thisPos = myHalo.P[i]->R();
+    //thisVel = myHalo.P[i]->V();
+
+    //std::cout << "Pos before: " << std::endl;
+    //std::cout << "[" << thisPos[0] << ", " << thisPos[1] << ", " << thisPos[2] << "\n";
+    //Global::RotateToDiskFrame(thisPos);
+    //Global::RotateToDiskFrame(thisVel);
+    
+    //std::cout << "Pos after: " << std::endl;
+    //std::cout << "[" << thisPos[0] << ", " << thisPos[1] << ", " << thisPos[2] << "\n";
+
+    //myHalo.P[i]->SetPos(thisPos);
+    //myHalo.P[i]->SetVel(thisVel);
+  }
+
+  std::cout << "Realigning disk...\n";
+  for (int i = 0; i < myDisk.P.size(); i++){
+    myDisk.P[i]->Rotate3();
+    
+    //std::vector<double> thisPos;
+    //std::vector<double> thisVel;
+
+    //thisPos = myDisk.P[i]->R();
+    //thisVel = myDisk.P[i]->V();
+
+    //Global::RotateToDiskFrame(thisPos);
+    //Global::RotateToDiskFrame(thisVel);
+
+    //myDisk.P[i]->SetPos(thisPos);
+    //myDisk.P[i]->SetVel(thisVel);
+  }
+
+  std::cout << "Realigning bulge...\n";
+  for (int i = 0; i < myBulge.P.size(); i++){
+    myBulge.P[i]->Rotate3();
+    //std::vector<double> thisPos;
+    //std::vector<double> thisVel;
+
+    //thisPos = myBulge.P[i]->R();
+    //thisVel = myBulge.P[i]->V();
+
+    //Global::RotateToDiskFrame(thisPos);
+    //Global::RotateToDiskFrame(thisVel);
+
+    //myBulge.P[i]->SetPos(thisPos);
+    //myBulge.P[i]->SetVel(thisVel);
+  }
+  std::cout << "Done with system realignment." << std::endl;
 }
-
+#endif
 
 /*
   Compute the virial ratio
 */
 
 double Galaxy::ComputeVirialRatio(){
-  double potential, kinetic, ratio, total_energy;
+  double potential, kinetic, verticalKineticEnergy, ratio, total_energy;
 
-  potential = kinetic = 0.;
+  potential = kinetic = verticalKineticEnergy = 0.;
+
+  if (Global::context.StartingSnap == Global::snapNum){
+    Global::verticalHeating0 = 0;
+  }
+
 
   for (int i = 0; i < myHalo.P.size(); i++){
     if (Global::context.ComovingIntegration == 1){
       potential += 0.5 * myHalo.P[i]->M() * myHalo.P[i]->Potential() \
 	* pow(Global::newSnap->Time(), -2.);
       kinetic += 0.5 * myHalo.P[i]->M() * myHalo.P[i]->VelX() \
-	* myHalo.P[i]->VelX() * pow(Global::newSnap->Time(),1.0);
+	* myHalo.P[i]->VelX() * pow(Global::newSnap->Time(),0.0);
       kinetic += 0.5 * myHalo.P[i]->M() * myHalo.P[i]->VelY() \
-	* myHalo.P[i]->VelY() * pow(Global::newSnap->Time(),1.0);
+	* myHalo.P[i]->VelY() * pow(Global::newSnap->Time(),0.0);
       kinetic += 0.5 * myHalo.P[i]->M() * myHalo.P[i]->VelZ() \
-	* myHalo.P[i]->VelZ() * pow(Global::newSnap->Time(),1.0);
+	* myHalo.P[i]->VelZ() * pow(Global::newSnap->Time(),0.0);	
+
     }
     else{
       potential += 0.5 * myHalo.P[i]->M() * myHalo.P[i]->Potential();
       kinetic += 0.5 * myHalo.P[i]->M() * myHalo.P[i]->VelX() * myHalo.P[i]->VelX();
       kinetic += 0.5 * myHalo.P[i]->M() * myHalo.P[i]->VelY() * myHalo.P[i]->VelY();
       kinetic += 0.5 * myHalo.P[i]->M() * myHalo.P[i]->VelZ() * myHalo.P[i]->VelZ();
+
     }
   }
 
@@ -261,31 +337,45 @@ double Galaxy::ComputeVirialRatio(){
       potential += 0.5 * myDisk.P[i]->M() * myDisk.P[i]->Potential() \
 	* pow(Global::newSnap->Time(), -2.);
       kinetic += 0.5 * myDisk.P[i]->M() * myDisk.P[i]->VelX() \
-        * myDisk.P[i]->VelX() * pow(Global::newSnap->Time(),1.0);
+        * myDisk.P[i]->VelX() * pow(Global::newSnap->Time(),0.0);
       kinetic += 0.5 * myDisk.P[i]->M() * myDisk.P[i]->VelY() \
-        * myDisk.P[i]->VelY() * pow(Global::newSnap->Time(),1.0);
+        * myDisk.P[i]->VelY() * pow(Global::newSnap->Time(),0.0);
       kinetic += 0.5 * myDisk.P[i]->M() * myDisk.P[i]->VelZ() \
-        * myDisk.P[i]->VelZ() * pow(Global::newSnap->Time(),1.0);
+        * myDisk.P[i]->VelZ() * pow(Global::newSnap->Time(),0.0);
+
+      verticalKineticEnergy += 0.5 * myDisk.P[i]->M() * myDisk.P[i]->VelZ() \
+        * myDisk.P[i]->VelZ() * pow(Global::newSnap->Time(),0.0);
+      if (Global::context.StartingSnap == Global::snapNum){
+	Global::verticalHeating0 += 0.5 * myDisk.P[i]->M() * myDisk.P[i]->VelZ() \
+          * myDisk.P[i]->VelZ() * pow(Global::newSnap->Time(),0.0);
+      }
+
+
     }
     else{
       potential += 0.5 * myDisk.P[i]->M() * myDisk.P[i]->Potential();
       kinetic += 0.5 * myDisk.P[i]->M() * myDisk.P[i]->VelX() * myDisk.P[i]->VelX();
       kinetic += 0.5 * myDisk.P[i]->M() * myDisk.P[i]->VelY() * myDisk.P[i]->VelY();
       kinetic += 0.5 * myDisk.P[i]->M() * myDisk.P[i]->VelZ() * myDisk.P[i]->VelZ();
+      verticalKineticEnergy += 0.5 * myDisk.P[i]->M() * myDisk.P[i]->VelZ() \
+        * myDisk.P[i]->VelZ();
+      if (Global::context.StartingSnap == Global::snapNum){
+	Global::verticalHeating0 += 0.5 * myDisk.P[i]->M() * myDisk.P[i]->VelZ() \
+          * myDisk.P[i]->VelZ();
+      }
     }
   }
   
   for (int i = 0; i < myBulge.P.size(); i++){
-
     if (Global::context.ComovingIntegration == 1){
       potential += 0.5 * myBulge.P[i]->M() * myBulge.P[i]->Potential() *\
 	pow(Global::newSnap->Time(), -2.);
       kinetic += 0.5 * myBulge.P[i]->M() * myBulge.P[i]->VelX() \
-        * myBulge.P[i]->VelX() * pow(Global::newSnap->Time(),1.0);
+        * myBulge.P[i]->VelX() * pow(Global::newSnap->Time(),0.0);
       kinetic += 0.5 * myBulge.P[i]->M() * myBulge.P[i]->VelY() \
-        * myBulge.P[i]->VelY() * pow(Global::newSnap->Time(),1.0);
+        * myBulge.P[i]->VelY() * pow(Global::newSnap->Time(),0.0);
       kinetic += 0.5 * myBulge.P[i]->M() * myBulge.P[i]->VelZ() \
-        * myBulge.P[i]->VelZ() * pow(Global::newSnap->Time(),1.0);
+        * myBulge.P[i]->VelZ() * pow(Global::newSnap->Time(),0.0);
     }
     else{
       potential += 0.5 * myBulge.P[i]->M() * myBulge.P[i]->Potential();
@@ -300,6 +390,11 @@ double Galaxy::ComputeVirialRatio(){
   std::cout << "Potential Energy: " << potential << std::endl;
   std::cout << "Kinetic Energy: " << kinetic << std::endl;
   ratio = potential / (2. * kinetic);
+  
+  Global::kineticEnergies.push_back(kinetic);
+  Global::verticalHeating.push_back(verticalKineticEnergy / Global::verticalHeating0);
+  Global::potentialEnergies.push_back(potential);
+  Global::virialRatios.push_back(ratio);
   return ratio;
 }
 
@@ -307,6 +402,15 @@ double Galaxy::ComputeVirialRatio(){
 /*
   Get a list of the particle x positions
 */
+
+std::vector<double> Galaxy::GetHaloXs(){
+  std::vector<double> xVals;
+  for (int i = 0; i < myHalo.P.size(); i++){
+    xVals.push_back(myHalo.P[i]->PosX());
+  }
+  return xVals;
+}
+
 
 std::vector<double> Galaxy::GetDiskXs(){
   std::vector<double> xVals;
@@ -320,6 +424,15 @@ std::vector<double> Galaxy::GetDiskXs(){
   Get a list of the particle y positions
 */
 
+
+std::vector<double>  Galaxy::GetHaloYs(){
+  std::vector<double> yVals;
+  for (int i = 0; i < myHalo.P.size(); i++){
+    yVals.push_back(myHalo.P[i]->PosY());
+  }
+  return yVals;
+}
+
 std::vector<double>  Galaxy::GetDiskYs(){
   std::vector<double> yVals;
   for (int i = 0; i < myDisk.P.size(); i++){
@@ -332,6 +445,14 @@ std::vector<double>  Galaxy::GetDiskYs(){
   Get a list of the particle z positions
 */
 
+std::vector<double>  Galaxy::GetHaloZs(){
+  std::vector<double> zVals;
+  for (int i = 0; i < myHalo.P.size(); i++){
+    zVals.push_back(myHalo.P[i]->PosZ());
+  }
+  return zVals;
+}
+
 std::vector<double>  Galaxy::GetDiskZs(){
   std::vector<double> zVals;
   for (int i = 0; i < myDisk.P.size(); i++){
@@ -341,3 +462,193 @@ std::vector<double>  Galaxy::GetDiskZs(){
 }
 
 
+
+/*
+  Compute the moment of inertia tensor
+  for disk particles
+*/
+
+std::vector<std::vector<double> > Galaxy::GetDiskMofITensor(){
+  std::vector<std::vector<double> > mofI(3,std::vector<double>(3,0.));
+  std::vector<std::vector<double> > identity(3,std::vector<double>(3,0.));
+  std::vector<std::vector<double> > inner(3,std::vector<double>(3,0.));
+  std::vector<std::vector<double> > outer;
+  std::vector<double> p;
+
+  identity[0][0] = identity[1][1] = identity[2][2] = 1;
+  
+  std::cout << "Computing disk MofI... " << std::endl;
+
+  for (unsigned int i = 0; i < myDisk.P.size(); i++){
+    p = myDisk.P[i]->R();
+    Global::SqrMatrixScalarMultiply(identity, Global::Dot(p,p),inner);
+    outer = Global::Outer(p,p);
+    Global::SqrMatrixScalarMultiply(inner, myDisk.P[i]->M(), inner);
+    Global::SqrMatrixScalarMultiply(outer, myDisk.P[i]->M(), outer);
+
+    Global::SqrMatrixAdd(mofI, inner, mofI);
+    Global::SqrMatrixSubtract(mofI, outer, mofI);
+
+    Global::SqrMatrixSubtract(inner,inner,inner);
+  }
+  std::cout << "Done." << std::endl;
+
+  return mofI;
+}
+
+
+/*
+  Compute angular momentum components
+*/
+
+void Galaxy::ComputeAngularMomentum(){
+  std::vector<double> lHalo(3,0);
+  std::vector<double> lDisk(3,0);
+  std::vector<double> lBulge(3,0);
+  std::vector<double> lInnerHalo(3,0);
+
+  std::vector<double> diskInnerL(3,0);
+  double r;
+  std::vector<double> pTemp;
+
+
+  std::cout << "Computing halo angular momentum..." << std::endl;
+  for (unsigned int i = 0; i < myHalo.P.size(); i++){
+    lHalo[0] += myHalo.P[i]->M() * (myHalo.P[i]->PosY() * myHalo.P[i]->VelZ() - \
+				    myHalo.P[i]->PosZ() * myHalo.P[i]->VelY());
+    lHalo[1] += myHalo.P[i]->M() * (myHalo.P[i]->PosZ() * myHalo.P[i]->VelX() - \
+				    myHalo.P[i]->PosX() * myHalo.P[i]->VelZ());
+    lHalo[2] += myHalo.P[i]->M() * (myHalo.P[i]->PosX() * myHalo.P[i]->VelY() - \
+				    myHalo.P[i]->PosY() * myHalo.P[i]->VelX());
+
+    pTemp = myHalo.P[i]->R();
+    r = Global::Magnitude(pTemp);
+    if (r < Global::context.HaloInnerRad){
+      lInnerHalo[0] += myHalo.P[i]->M() * (myHalo.P[i]->PosY() * myHalo.P[i]->VelZ() - \
+				      myHalo.P[i]->PosZ() * myHalo.P[i]->VelY());
+      lInnerHalo[1] += myHalo.P[i]->M() * (myHalo.P[i]->PosZ() * myHalo.P[i]->VelX() - \
+				      myHalo.P[i]->PosX() * myHalo.P[i]->VelZ());
+      lInnerHalo[2] += myHalo.P[i]->M() * (myHalo.P[i]->PosX() * myHalo.P[i]->VelY() - \
+				      myHalo.P[i]->PosY() * myHalo.P[i]->VelX());
+
+    }
+  }
+
+  std::cout << "Computing disk angular momentum..." << std::endl;
+
+  for (unsigned int i = 0; i < myDisk.P.size(); i++){
+    lDisk[0] += myDisk.P[i]->M() * (myDisk.P[i]->PosY() * myDisk.P[i]->VelZ() - \
+                                    myDisk.P[i]->PosZ() * myDisk.P[i]->VelY());
+    lDisk[1] += myDisk.P[i]->M() * (myDisk.P[i]->PosZ() * myDisk.P[i]->VelX() - \
+                                    myDisk.P[i]->PosX() * myDisk.P[i]->VelZ());
+    lDisk[2] += myDisk.P[i]->M() * (myDisk.P[i]->PosX() * myDisk.P[i]->VelY() - \
+                                    myDisk.P[i]->PosY() * myDisk.P[i]->VelX());
+
+    std::vector<double> pTemp;
+    pTemp = myDisk.P[i]->R();
+    if (Global::Magnitude(pTemp) < INNER_RADIUS){
+      diskInnerL[0] += myDisk.P[i]->M() * (myDisk.P[i]->PosY() * myDisk.P[i]->VelZ() - \
+					   myDisk.P[i]->PosZ() * myDisk.P[i]->VelY());
+      diskInnerL[1] += myDisk.P[i]->M() * (myDisk.P[i]->PosZ() * myDisk.P[i]->VelX() - \
+					   myDisk.P[i]->PosX() * myDisk.P[i]->VelZ());
+      diskInnerL[2] += myDisk.P[i]->M() * (myDisk.P[i]->PosX() * myDisk.P[i]->VelY() - \
+					   myDisk.P[i]->PosY() * myDisk.P[i]->VelX());
+    }
+  }
+
+  std::cout << "Computing bulge angular momentum..." << std::endl;
+
+  for (unsigned int i = 0; i < myBulge.P.size(); i++){
+    lBulge[0] += myBulge.P[i]->M() * (myBulge.P[i]->PosY() * myBulge.P[i]->VelZ() - \
+				      myBulge.P[i]->PosZ() * myBulge.P[i]->VelY());
+    lBulge[1] += myBulge.P[i]->M() * (myBulge.P[i]->PosZ() * myBulge.P[i]->VelX() - \
+				      myBulge.P[i]->PosX() * myBulge.P[i]->VelZ());
+    lBulge[2] += myBulge.P[i]->M() * (myBulge.P[i]->PosX() * myBulge.P[i]->VelY() - \
+				      myBulge.P[i]->PosY() * myBulge.P[i]->VelX());
+  }
+
+
+  Global::lHalo.push_back(lHalo);
+  Global::lDisk.push_back(lDisk);
+  Global::lBulge.push_back(lBulge);
+  Global::lInnerHalo.push_back(lInnerHalo);
+
+  haloAngularMomentum  = lHalo;
+  diskAngularMomentum  = lDisk;
+  bulgeAngularMomentum = lBulge;
+
+  diskInnerAngularMomentum = diskInnerL;
+  diskAngularMomentumAxis  = diskInnerL;
+
+  Global::Normalize(diskAngularMomentumAxis);
+}
+
+
+/*
+  Removes unbound particles by assuming halo
+  is dominant source of mass and constructing
+  and approximation to local escape velocity
+*/
+
+
+bool operator< (Particle &a,Particle &b){
+  std::vector<double> ra;
+  std::vector<double> rb;
+
+  ra = a.R();
+  rb = b.R();
+
+  return (ra[0]*ra[0] + ra[1] * ra[1] + ra[2] * ra[2] <
+	  rb[0]*rb[0] + rb[1] * rb[1] + rb[2] * rb[2]);
+
+}
+
+
+void Galaxy::RemoveUnboundHaloParticles(double vxBar, double vyBar, double vzBar, double Rs){
+
+  std::vector<double> mEnclosed; // Mass enclosed
+  double m,vx,vy,vz,v2,x,y,z,r;
+  
+  /*
+    Sort halo particles by radius
+  */
+
+  std::cout << "Sorting particles by radius..." << std::endl;
+  std::sort(myHalo.P.begin(), myHalo.P.end());
+  std::cout << "Sorted." << std::endl;
+
+  /*
+    If particle velocity^2 exceeds 2 G M / r,
+    pop particle from vector.
+  */
+
+  for (int i = 0; i < myHalo.P.size(); i++){
+    x  = myHalo.P[i]->PosX();
+    y  = myHalo.P[i]->PosY();
+    z  = myHalo.P[i]->PosZ();
+    r  = sqrt(x*x + y*y + z*z);
+    vx = myHalo.P[i]->VelX() - vxBar;
+    vy = myHalo.P[i]->VelY() - vyBar;
+    vz = myHalo.P[i]->VelZ() - vzBar;
+    v2 = vx*vx + vy*vy + vz*vz;
+    m  = myHalo.P[i]->M();
+
+    if (v2 > 2. * 1.e10 * G * m * myHalo.P.size() / (0.5*Rs)){
+      std::cout << "Removed particle at r = " << r << " with v = " << sqrt(v2) << " > " \
+		<< sqrt(2. * 1.e10 * G * m * myHalo.P.size() / (0.5*Rs)) << std::endl;
+      myHalo.P.erase(myHalo.P.begin() + i);
+      i--;
+    }
+  }
+}
+
+/*
+  Prints IDs of particles in the halo
+*/
+
+void Galaxy::PrintHaloIDs(char * file){
+  std::ofstream f(file, std::ofstream::out);
+  for (unsigned int i = 0; i < myHalo.P.size(); i++){
+    f << myHalo.P[i]->MyID() << std::endl;
+  }
+}

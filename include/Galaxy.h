@@ -12,6 +12,11 @@ class Galaxy{
   Bulge myBulge;
   Halo myHalo;
   int num;
+  std::vector<double> haloAngularMomentum;
+  std::vector<double> bulgeAngularMomentum;
+  std::vector<double> diskAngularMomentum;
+  std::vector<double> diskInnerAngularMomentum;
+  std::vector<double> diskAngularMomentumAxis;
   std::vector<std::vector<double> > diskMofI;
 
  public:
@@ -22,11 +27,20 @@ class Galaxy{
 
   // Center on disk via shrinking sphere of centroids
   void CenterOnDiskCentroid();
+  void CenterOnHaloCentroid();
   void AlignToMinorAxis();
+  void ComputeAngularMomentum();
+  void RemoveUnboundHaloParticles(double vxBar, double vyBar, double vzBar,double Rs);
+  void PrintHaloIDs(char * file);
   double ComputeVirialRatio();
+  std::vector<double> GetHaloXs();
+  std::vector<double> GetHaloYs();
+  std::vector<double> GetHaloZs();
   std::vector<double> GetDiskXs();
   std::vector<double> GetDiskYs();
   std::vector<double> GetDiskZs();
+  std::vector<double> GetAngularMomentumAxis(){return diskAngularMomentumAxis;}
+  std::vector<std::vector<double> > GetDiskMofITensor();
 };
 
 #endif

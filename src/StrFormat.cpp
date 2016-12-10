@@ -54,3 +54,37 @@ std::string Global::GetDiskYZDensityHistName(int i){
   return (base + number + tail);
 
 }
+
+
+std::string Global::GetHaloXYDensityHistName(int i){
+  std::string base, number, tail;
+
+  base = Global::context.PathToGnuplot + "/Halo_Density_XY.";
+  tail = ".ascii";
+  number = std::to_string(i);
+
+  return (base + number + tail);
+
+}
+
+std::string Global::GetHaloXZDensityHistName(int i){
+  std::string base, number, tail;
+
+  base = Global::context.PathToGnuplot + "/Halo_Density_XZ.";
+  tail = ".ascii";
+  number = std::to_string(i);
+
+  return (base + number + tail);
+
+}
+
+std::string Global::GetHaloYZDensityHistName(int i){
+  std::string base, number, tail;
+
+  base = Global::context.PathToGnuplot +  "/Halo_Density_YZ.";
+  tail = ".ascii";
+  number = std::to_string(i);
+
+  return (base + number + tail);
+
+}

@@ -26,6 +26,7 @@ namespace Global{
 
   std::string snapName;
 
+  std::vector<double> timeArr;
   std::vector<double> sbins;
   std::vector<double> zbins;
   std::vector<double> ybins;
@@ -35,11 +36,43 @@ namespace Global{
   Histogram2D<double> * diskXYHist;
   Histogram2D<double> * diskXZHist;
   Histogram2D<double> * diskYZHist;
+
+  Histogram2D<double> * haloXYHist;
+  Histogram2D<double> * haloXZHist;
+  Histogram2D<double> * haloYZHist;
+
 #endif
 
 #ifdef COMPUTE_VIRIAL_RATIO
   double virialRatio;
+  double verticalHeating0;
+  std::vector<double> kineticEnergies;
+  std::vector<double> potentialEnergies;
+  std::vector<double> virialRatios;
+  std::vector<double> verticalHeating;
+
   std::vector<double> viralRatios;
+#endif
+
+#ifdef COMPUTE_DISK_MOMENT_OF_INERTIA
+  std::vector<std::vector<double> > mofI(3, std::vector<double>(3,0));
+#endif
+
+#ifdef ROTATE_SYSTEM
+  std::vector<std::vector<double> > eulerMatrix(3, std::vector<double>(3,0));
+  std::vector<std::vector<double> > eulerMatrixT(3, std::vector<double>(3,0));
+  std::vector<std::vector<double> > eigenSpace(4, std::vector<double>(3,0));
+  std::vector<double> eigenvalues(3,0);
+  std::vector<double> evA(3,0);
+  std::vector<double> evB(3,0);
+  std::vector<double> evC(3,0);
+#endif
+
+#ifdef COMPUTE_ANGULAR_MOMENTUM
+  std::vector<std::vector<double> > lHalo;
+  std::vector<std::vector<double> > lInnerHalo;
+  std::vector<std::vector<double> > lDisk;
+  std::vector<std::vector<double> > lBulge;
 #endif
 
 

@@ -8,6 +8,7 @@ struct Context{
   double OmegaB;
   double OmegaLambda;
   double HubbleParam;
+  double HaloInnerRad;
   double DiskShrinkingSphereRad;
   double DiskShrinkingSphereCut;
   double DiskShrinkingSphereRed;
@@ -19,6 +20,7 @@ struct Context{
   int ComovingIntegration;
   int PeriodicBoundaries;
   int NumSnaps;
+  int StartingSnap;
 
   int HaloParticleType;
   int DiskParticleType;
@@ -32,6 +34,7 @@ struct Context{
   std::string SnapshotBase;
   std::string PathToGnuplot;
   std::string DensityPalette;
+  std::string DensityPalette2;
   std::string GalaxyList;
 };
 
