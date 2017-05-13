@@ -10,10 +10,10 @@
 SnapshotBase       ../gadget-3-with-particle-disks/OUTPUTS/snapshot_
 
 NumSnaps           501
-StartingSnap       250
+StartingSnap       0
 PathToGnuplot      ./Plots
-DensityPalette     ./Palettes/parula.pal
-DensityPalette2    ./Palettes/bupu.pal
+DensityPalette     ./Palettes/greys.pal
+DensityPalette2    ./Palettes/greys.pal
 HaloParticleType   1
 DiskParticleType   2
 BulgeParticleType  3
@@ -21,8 +21,8 @@ GalaxyList         ./galaxy_list.dat
 
 % Cosmology
 
-ComovingIntegration    1
-PeriodicBoundaries     1
+ComovingIntegration    0
+PeriodicBoundaries     0
 HubbleParam            0.679
 Omega0                 0.306
 OmegaB                 0.0481
@@ -38,7 +38,7 @@ HaloInnerRad            40.0
 DiskShrinkingSphereRad  20.0
 DiskShrinkingSphereCut  1.0
 DiskShrinkingSphereRed  2.0
-RGridRes                150
-XGridRes                150
-YGridRes                150
-ZGridRes                150
+RGridRes                50
+XGridRes                100
+YGridRes                100
+ZGridRes                100

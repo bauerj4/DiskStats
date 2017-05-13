@@ -7,6 +7,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <cmath>
 
 /*
   
@@ -21,75 +22,94 @@
 */
 
 
+using namespace Global;
+
 int main(int argc, char ** argv){
 
-  Global::ReadParameterFile(argv[1]);
-  Global::PrintParameters();
+  ReadParameterFile(argv[1]);
+  PrintParameters();
 
-  Global::xbins = Global::LinearSpacing(-25,25,Global::context.XGridRes);
-  Global::ybins = Global::LinearSpacing(-25,25,Global::context.YGridRes);
-  Global::zbins = Global::LinearSpacing(-25,25,Global::context.ZGridRes);
+  xbins  = LinearSpacing(-25,25,context.XGridRes);
+  ybins  = LinearSpacing(-25,25,context.YGridRes);
+  zbins  = LinearSpacing(-25,25,context.ZGridRes);
+  sbins  = LinearSpacing(0.,25.,context.RGridRes);
+  
+  vxbins = LinearSpacing(-200,200,context.XGridRes);
+  vybins = LinearSpacing(-200,200,context.YGridRes);
+  vzbins = LinearSpacing(-200,200,context.ZGridRes);
 
+
+  /*
+    Set the surface density weights
+  */
+  
+  double ds, s;
+  for (int k = 0; k < sbins.size() - 1; k++){
+    ds = sbins[k + 1] - sbins[k];
+    s  = sbins[k] + ds;
+    surfaceDensityWeights.push_back(1./(2. * M_PI * s * ds));
+  }
 
   /*
     Loop over snapshots.
   */
 
-  for (Global::snapNum = Global::context.StartingSnap; Global::snapNum < Global::context.NumSnaps; \
-       Global::snapNum++){
-    Global::snapName = "";
+  for (snapNum = context.StartingSnap; snapNum < context.NumSnaps; \
+       snapNum++){
+    snapName = "";
 
     // Gadget has a weird snapshot name format
 #ifdef GADGET2
-    Global::snapName = Global::GetGadgetSnapshotName(Global::snapNum);
+    snapName = GetGadgetSnapshotName(snapNum);
 #else
-    Global::snapName = Global::context.SnapshotBase + std::to_string(Global::snapNum);
+    snapName = context.SnapshotBase + std::to_string(snapNum);
 #endif // GADGET2
 
     // Create and load new snapshot data
-    Global::newSnap = new Snapshot((char*)Global::snapName.c_str(), 1);
-    Global::timeArr.push_back(Global::newSnap->Time());
+    newSnap = new Snapshot((char*)snapName.c_str(), 1);
+    timeArr.push_back(newSnap->Time());
     // Create the galaxy
 
 #ifdef USE_X_BAR
-    Global::thisGalaxy = new Galaxy(Global::xBar, Global::yBar, Global::zBar, \
-				    Global::context.GalaxyR0, Global::newSnap);
+    thisGalaxy = new Galaxy(xBar, yBar, zBar, \
+			    context.GalaxyR0, newSnap);
 #else
-    Global::thisGalaxy = new Galaxy(Global::context.GalaxyX0, Global::context.GalaxyY0,\
-				    Global::context.GalaxyZ0, Global::context.GalaxyR0,\
-				    Global::newSnap);
+    thisGalaxy = new Galaxy(context.GalaxyX0, context.GalaxyY0,\
+			    context.GalaxyZ0, context.GalaxyR0,	\
+			    newSnap);
 #endif // USE_X_BAR
 
 
+    
+
 #ifdef CENTER_ON_DISK_CENTROID
-    Global::thisGalaxy->CenterOnDiskCentroid();
+    thisGalaxy->CenterOnDiskCentroid();
 #endif // CENTER_ON_DISK_CENTROID
 
 
 #ifdef COMPUTE_DISK_MOMENT_OF_INERTIA
-    Global::mofI = Global::thisGalaxy->GetDiskMofITensor();
+    mofI = thisGalaxy->GetDiskMofITensor();
     std::cout << "MofI = " << std::endl;
-    Global::PrintMatrix(Global::mofI);
+    PrintMatrix(mofI);
 #endif
 
 #ifdef COMPUTE_ANGULAR_MOMENTUM
-    Global::thisGalaxy->ComputeAngularMomentum();
+    thisGalaxy->ComputeAngularMomentum();
 #endif
 
 #if defined(COMPUTE_DISK_MOMENT_OF_INERTIA) && defined(ROTATE_SYSTEM) && \
     !defined(ORIENT_WITH_INNER_ANGULAR_MOMENTUM)
-    Global::Eigenspace(Global::mofI, Global::eigenSpace);
-    //Global::SortEigenspace();
+    Eigenspace(mofI, eigenSpace);
 
     std::cout << "Eigenspace = " << std::endl;
-    Global::PrintMatrix(Global::eigenSpace);
+    PrintMatrix(eigenSpace);
 
     // Orient to minor axis                                                                                                                 
-    Global::EulerMatrix(Global::eigenSpace[1], Global::eulerMatrix);
+    EulerMatrix(eigenSpace[1], eulerMatrix);
     std::cout << "Euler matrix = " << std::endl;
-    Global::PrintMatrix(Global::eulerMatrix);
+    PrintMatrix(eulerMatrix);
 
-    Global::thisGalaxy->AlignToMinorAxis();
+    thisGalaxy->AlignToMinorAxis();
 #endif
 
 
@@ -97,76 +117,85 @@ int main(int argc, char ** argv){
     defined(ORIENT_WITH_INNER_ANGULAR_MOMENTUM)
 
     std::vector<double> axis;
-    axis = Global::thisGalaxy->GetAngularMomentumAxis();
-    Global::EulerMatrix(axis, Global::eulerMatrix);
+    axis = thisGalaxy->GetAngularMomentumAxis();
+    EulerMatrix(axis, eulerMatrix);
     std::cout << "Euler matrix = " << std::endl;
-    Global::PrintMatrix(Global::eulerMatrix);
+    PrintMatrix(eulerMatrix);
 
-    Global::thisGalaxy->AlignToMinorAxis();
+    thisGalaxy->AlignToMinorAxis();
 #endif
     
-    /*
-    delete Global::thisGalaxy;
-    delete Global::newSnap;
-    continue;
-    */
-
     // Make density histograms
 
-    /*
-    std::cout << "Making spatial bins..." << std::endl;
-
-    Global::xbins = Global::LinearSpacing(-25,25,Global::context.XGridRes);
-    Global::ybins = Global::LinearSpacing(-25,25,Global::context.YGridRes);
-    Global::zbins = Global::LinearSpacing(-25,25,Global::context.ZGridRes);
-
-    std::cout << "Done." << std::endl;
-    
-    */
 #ifdef DENSITY_HISTOGRAMS
 
     std::cout << "Getting halo position lists..." << std::endl;
-    std::vector<double> haloXVals;
-    haloXVals = Global::thisGalaxy->GetHaloXs();
-    std::vector<double> haloYVals;
-    haloYVals = Global::thisGalaxy->GetHaloYs();
-    std::vector<double> haloZVals;
-    haloZVals = Global::thisGalaxy->GetHaloZs();
+    std::vector<double> haloXVals, haloYVals, haloZVals, diskXVals,\
+      diskYVals, diskZVals, diskAbsZVals, diskRVals, diskVZ2Vals, \
+      diskVXVals, diskVYVals, diskVZVals;
+
+    haloXVals = thisGalaxy->GetHaloXs();
+    haloYVals = thisGalaxy->GetHaloYs();
+    haloZVals = thisGalaxy->GetHaloZs();
+
+
     std::cout << "Done." << std::endl;
-    Global::haloXYHist = new Histogram2D<double>(haloXVals, haloYVals, Global::xbins,Global::ybins);
-    Global::haloXZHist = new Histogram2D<double>(haloXVals, haloZVals, Global::xbins,Global::zbins);
-    Global::haloYZHist = new Histogram2D<double>(haloYVals, haloZVals, Global::ybins,Global::zbins);
+    haloXYHist = new Histogram2D<double>(haloXVals, haloYVals, xbins,ybins);
+    haloXZHist = new Histogram2D<double>(haloXVals, haloZVals, xbins,zbins);
+    haloYZHist = new Histogram2D<double>(haloYVals, haloZVals, ybins,zbins);
 
     std::cout << "Writing density histogram output..." << std::endl;
-    Global::haloXYHist->PrintASCII(Global::GetHaloXYDensityHistName(Global::snapNum));
-    Global::haloXZHist->PrintASCII(Global::GetHaloXZDensityHistName(Global::snapNum));
-    Global::haloYZHist->PrintASCII(Global::GetHaloYZDensityHistName(Global::snapNum));
+    haloXYHist->PrintASCII(GetHaloXYDensityHistName(snapNum));
+    haloXZHist->PrintASCII(GetHaloXZDensityHistName(snapNum));
+    haloYZHist->PrintASCII(GetHaloYZDensityHistName(snapNum));
 
 
     std::cout << "Getting disk position lists..." << std::endl;
-    std::vector<double> diskXVals; 
-    diskXVals = Global::thisGalaxy->GetDiskXs();
-    std::vector<double> diskYVals;
-    diskYVals = Global::thisGalaxy->GetDiskYs();
-    std::vector<double> diskZVals;
-    diskZVals = Global::thisGalaxy->GetDiskZs();
+    diskXVals  = thisGalaxy->GetDiskXs();
+    diskYVals  = thisGalaxy->GetDiskYs();
+    diskZVals  = thisGalaxy->GetDiskZs();
+    diskVXVals = thisGalaxy->GetDiskVXs();
+    diskVYVals = thisGalaxy->GetDiskVYs();
+    diskVZVals = thisGalaxy->GetDiskVZs();
+    for (int i = 0; i < diskVZVals.size(); i++){
+      diskAbsZVals.push_back(fabs(diskZVals[i]));
+      diskVZ2Vals.push_back(diskVZVals[i]*diskVZVals[i]);
+    }
+
+    diskRVals = thisGalaxy->GetDiskCylRs();
+
     std::cout << "Done." << std::endl;
-    Global::diskXYHist = new Histogram2D<double>(diskXVals, diskYVals, Global::xbins,Global::ybins);
-    Global::diskXZHist = new Histogram2D<double>(diskXVals, diskZVals, Global::xbins,Global::zbins);
-    Global::diskYZHist = new Histogram2D<double>(diskYVals, diskZVals, Global::ybins,Global::zbins);    
+    diskXYHist = new Histogram2D<double>(diskXVals, diskYVals, xbins,ybins);
+    diskXZHist = new Histogram2D<double>(diskXVals, diskZVals, xbins,zbins);
+    diskYZHist = new Histogram2D<double>(diskYVals, diskZVals, ybins,zbins);    
+    diskSurfaceDensity = new Histogram1D<double>(diskRVals,sbins\
+						 ,1,surfaceDensityWeights);
+    diskAbsVerticalDensity = new Histogram1D<double>(diskAbsZVals,sbins,1);
+    diskVerticalDensity    = new Histogram1D<double>(diskZVals,zbins,1);
+    diskAverageZ           = new Histogram1D<double>(diskRVals,sbins,0,diskAbsZVals);
+    diskVXVSR              = new Histogram1D<double>(diskRVals,sbins,0,diskVXVals);
+    diskVYVSR              = new Histogram1D<double>(diskRVals,sbins,0,diskVYVals);
+    diskVZVSR              = new Histogram1D<double>(diskRVals,sbins,0,diskVZVals);
+    diskVZ2VSR             = new Histogram1D<double>(diskRVals,sbins,0,diskVZ2Vals);
+    diskSigmaZ2            = *diskVZ2VSR - *((*diskVZVSR)*(*diskVZVSR));
 
     std::cout << "Writing density histogram output..." << std::endl;
-    Global::diskXYHist->PrintASCII(Global::GetDiskXYDensityHistName(Global::snapNum));
-    Global::diskXZHist->PrintASCII(Global::GetDiskXZDensityHistName(Global::snapNum));
-    Global::diskYZHist->PrintASCII(Global::GetDiskYZDensityHistName(Global::snapNum));
+    diskXYHist->PrintASCII(GetDiskXYDensityHistName(snapNum));
+    diskXZHist->PrintASCII(GetDiskXZDensityHistName(snapNum));
+    diskYZHist->PrintASCII(GetDiskYZDensityHistName(snapNum));
+    diskSurfaceDensity->PrintASCII(GetDiskSurfaceDensityName(snapNum));
+    diskVerticalDensity->PrintASCII(GetDiskVerticalDensityName(snapNum));
+    diskAbsVerticalDensity->PrintASCII(GetDiskAbsVerticalDensityName(snapNum));
+    diskAverageZ->PrintASCII(GetDiskAverageZName(snapNum));
+    diskSigmaZ2->PrintASCII(GetDiskSigmaZ2Name(snapNum));
 
     std::cout << "Done." << std::endl;
-    Global::GNUPLOT_DensityScripts(Global::snapNum);
+    GNUPLOT_DensityScripts(snapNum);
 #endif // DENSITY_HISTOGRAMS
 
 #ifdef COMPUTE_VIRIAL_RATIO
-    Global::virialRatio = Global::thisGalaxy->ComputeVirialRatio();
-    std::cout << "Virial Ratio: " << Global::virialRatio << std::endl;
+    virialRatio = thisGalaxy->ComputeVirialRatio();
+    std::cout << "Virial Ratio: " << virialRatio << std::endl;
 #endif
 
     // Reset variables
@@ -178,17 +207,22 @@ int main(int argc, char ** argv){
     diskYVals.clear();
     diskZVals.clear();
 #endif
-    //xVals.swap(std::vector<double>(xVals));
-    //yVals.swap(std::vector<double>(yVals));
-    //zVals.swap(std::vector<double>(zVals));
 
-    delete Global::diskXYHist;
-    delete Global::diskXZHist;
-    delete Global::diskYZHist;
-    delete Global::thisGalaxy;
-    delete Global::newSnap;
+    delete diskXYHist;
+    delete diskXZHist;
+    delete diskYZHist;
+    delete diskVXVSR;
+    delete diskVYVSR;
+    delete diskVZVSR;
+    delete diskVZ2VSR;
+    delete diskSurfaceDensity;
+    delete diskVerticalDensity;
+    delete diskAbsVerticalDensity;
+    delete diskAverageZ;
+    delete thisGalaxy;
+    delete newSnap;
   }
 
-  Global::WriteTimeSeriesOutput();
+  WriteTimeSeriesOutput();
   return 0;  // Success
 }

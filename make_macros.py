@@ -14,7 +14,7 @@ types = []
 #
 
 for line in config_file:
-    if (line[0]=='#'):
+    if (line[0]=='#' or line == "\n"):
         pass
     else:
         tokens = line.split('=')

@@ -17,9 +17,9 @@
 #define GADGET2        // Currently no support for non-Gadget codes
 #define USE_POTENTIALS // Comment this out if your snapshot
                        // doesn't have these
-#define GADGET_COSMOLOGY
-#define  REASSIGN // Use if disk particles are in halo snap
-//#define APPEND    // Use if disk particles need to be added
+//#define GADGET_COSMOLOGY
+//#define  REASSIGN // Use if disk particles are in halo snap
+#define APPEND    // Use if disk particles need to be added
 
 /*
   Class header for a single particle
@@ -745,15 +745,15 @@ int main(int argc, char ** argv){
     //      iss >> vz;
 
 
-    disk_m.push_back(atof(m.c_str())* massUnitConversion);
+    disk_m.push_back(atof(m.c_str()) * massUnitConversion);
     disk_x.push_back(atof(x.c_str()));
     disk_y.push_back(atof(y.c_str()));
     disk_z.push_back(atof(z.c_str()));
 
 #ifdef GADGET_COSMOLOGY
-    disk_vx.push_back(atof(vx.c_str()) * 100. / (pow(timeFromRedshift,1.5)));
-    disk_vy.push_back(atof(vy.c_str()) * 100. / (pow(timeFromRedshift,1.5) ));
-    disk_vz.push_back(atof(vz.c_str()) * 100. / (pow(timeFromRedshift,1.5) ));
+    disk_vx.push_back(atof(vx.c_str()) * 100. / (pow(timeFromRedshift,0.5) * 0.679));
+    disk_vy.push_back(atof(vy.c_str()) * 100. / (pow(timeFromRedshift,0.5) * 0.679));
+    disk_vz.push_back(atof(vz.c_str()) * 100. / (pow(timeFromRedshift,0.5) * 0.679));
 #else
     disk_vx.push_back(atof(vx.c_str()) * 100.);
     disk_vy.push_back(atof(vy.c_str()) * 100.);

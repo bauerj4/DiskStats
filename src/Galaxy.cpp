@@ -461,6 +461,43 @@ std::vector<double>  Galaxy::GetDiskZs(){
   return zVals;
 }
 
+std::vector<double>  Galaxy::GetDiskVXs(){
+  std::vector<double> vxVals;
+  for (int i = 0; i < myDisk.P.size(); i++){
+    vxVals.push_back(myDisk.P[i]->VelX());
+  }
+  return vxVals;
+}
+
+std::vector<double>  Galaxy::GetDiskVYs(){
+  std::vector<double> vyVals;
+  for (int i = 0; i < myDisk.P.size(); i++){
+    vyVals.push_back(myDisk.P[i]->VelY());
+  }
+  return vyVals;
+}
+
+std::vector<double>  Galaxy::GetDiskVZs(){
+  std::vector<double> vzVals;
+  for (int i = 0; i < myDisk.P.size(); i++){
+    vzVals.push_back(myDisk.P[i]->VelZ());
+  }
+  return vzVals;
+}
+
+
+
+std::vector<double> Galaxy::GetDiskCylRs(){
+  std::vector<double> rVals;
+  double R;
+  for (int i = 0; i < myDisk.P.size(); i++){
+    R = sqrt(myDisk.P[i]->PosX() * myDisk.P[i]->PosX() + myDisk.P[i]->PosY() * myDisk.P[i]->PosY());
+    rVals.push_back(R);
+    //Global::surfaceDensityWeights.push_back(1. /( 2. * M_PI * (Global::sbins[1] - Global::sbins[0]) * R ));
+  }
+  return rVals;
+}
+
 
 
 /*

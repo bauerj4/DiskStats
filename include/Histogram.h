@@ -21,6 +21,63 @@
   to just avoid linking the library in the first place.
 */
 
+template <typename T> class Histogram1D{
+ public:
+  //private:
+  std::vector<T> bins;
+  std::vector<double> counts;
+  //public:
+  // Constructor
+  Histogram1D(){}
+  Histogram1D(std::vector<T> &data, std::vector<T> &bins, int lognorm);
+  Histogram1D(std::vector<T> &data, std::vector<T> &bins, int lognorm, std::vector<double> weights);
+
+  // Get counts
+  std::vector<double> Counts(){return counts;}
+
+  // Return bin edges
+  std::vector<T> Bins(){return bins;}
+
+  // Print to file
+  void PrintASCII(std::string filepath);
+};
+// Addition operator
+
+template <typename T>
+Histogram1D<T> * operator+(const Histogram1D<T> &h1, const Histogram1D<T> &h2){
+  Histogram1D<T> * h3 = new Histogram1D<T>();
+  for (int i = 0; i < h1.counts.size(); i++)
+    h3->counts.push_back(h1.counts[i] + h2.counts[i]);
+  for ( int i = 0; i < h1.bins.size(); i++)
+    h3->bins.push_back(h1.bins[i]);
+  return h3;
+}
+
+
+// Subtraction operator
+
+template <typename T>
+Histogram1D<T> * operator-(const Histogram1D<T> &h1, const Histogram1D<T>  &h2){
+  Histogram1D<T> * h3 = new Histogram1D<T>();
+  for (int i = 0; i < h1.counts.size(); i++)
+    h3->counts.push_back(h1.counts[i] - h2.counts[i]);
+  for ( int i = 0; i < h1.bins.size(); i++)
+    h3->bins.push_back(h1.bins[i]);
+  return h3;
+}
+
+// Multiplication operator
+
+template <typename T>
+Histogram1D<T> * operator*(const Histogram1D<T> &h1, const Histogram1D<T>  &h2){
+  Histogram1D<T> * h3 = new Histogram1D<T>();
+  for (int i = 0; i < h1.counts.size(); i++)
+    h3->counts.push_back(h1.counts[i] * h2.counts[i]);
+  for ( int i = 0; i < h1.bins.size(); i++)
+    h3->bins.push_back(h1.bins[i]);
+  return h3;
+}
+
 template <typename T> class Histogram2D{
  private:
   std::vector<T> binsx;

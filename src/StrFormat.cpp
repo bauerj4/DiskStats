@@ -88,3 +88,58 @@ std::string Global::GetHaloYZDensityHistName(int i){
   return (base + number + tail);
 
 }
+
+std::string Global::GetDiskSurfaceDensityName(int i){
+  std::string base, number, tail;
+
+  base = Global::context.PathToGnuplot +  "/Disk_Surface_Density.";
+  tail = ".ascii";
+  number = std::to_string(i);
+
+  return (base + number + tail);
+}
+
+
+std::string Global::GetDiskVerticalDensityName(int i){
+  std::string base, number, tail;
+
+  base = Global::context.PathToGnuplot +  "/Disk_Vertical_Density.";
+  tail = ".ascii";
+  number = std::to_string(i);
+
+  return (base + number + tail);
+}
+
+std::string Global::GetDiskAbsVerticalDensityName(int i){
+  std::string base, number, tail;
+
+  base = Global::context.PathToGnuplot +  "/Disk_Abs_Vertical_Density.";
+  tail = ".ascii";
+  number = std::to_string(i);
+
+  return (base + number + tail);
+}
+
+
+std::string Global::GetDiskAverageZName(int i){
+  std::string base, number, tail;
+
+  base = Global::context.PathToGnuplot +  "/Disk_Average_Z.";
+  tail = ".ascii";
+  number = std::to_string(i);
+
+  return (base + number + tail);
+}
+
+
+std::string Global::GetDiskSigmaZ2Name(int i){
+  std::string base, number, tail;
+
+  base = Global::context.PathToGnuplot +  "/Disk_Sigma_Z2.";
+  tail = ".ascii";
+  number = std::to_string(i);
+
+  return (base + number + tail);
+}
+
+

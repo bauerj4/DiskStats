@@ -32,11 +32,15 @@ namespace Global{
   extern std::vector<double> zbins;
   extern std::vector<double> ybins;
   extern std::vector<double> xbins;
+  extern std::vector<double> vzbins;
+  extern std::vector<double> vybins;
+  extern std::vector<double> vxbins;
   extern std::vector<double> timeArr;
   extern std::vector<double> kineticEnergies;
   extern std::vector<double> potentialEnergies;
   extern std::vector<double> virialRatios;
   extern std::vector<double> verticalHeating;
+  extern std::vector<double> surfaceDensityWeights;
 
   extern std::vector<std::vector<double> > lHalo;
   extern std::vector<std::vector<double> > lInnerHalo;
@@ -51,6 +55,17 @@ namespace Global{
   extern Histogram2D<double> * haloXYHist;
   extern Histogram2D<double> * haloXZHist;
   extern Histogram2D<double> * haloYZHist;
+
+  extern Histogram1D<double> * diskSurfaceDensity;
+  extern Histogram1D<double> * diskVerticalDensity;
+  extern Histogram1D<double> * diskAbsVerticalDensity;
+  extern Histogram1D<double> * diskAverageZ;
+  extern Histogram1D<double> * diskAverageZDispersion;
+  extern Histogram1D<double> * diskVXVSR;
+  extern Histogram1D<double> * diskVYVSR;
+  extern Histogram1D<double> * diskVZVSR;
+  extern Histogram1D<double> * diskVZ2VSR;
+  extern Histogram1D<double> * diskSigmaZ2;
 
 #endif
 
@@ -124,6 +139,12 @@ namespace Global{
   std::string GetHaloXYDensityHistName(int i);
   std::string GetHaloXZDensityHistName(int i);
   std::string GetHaloYZDensityHistName(int i);
+  std::string GetDiskSurfaceDensityName(int i);
+  std::string GetDiskVerticalDensityName(int i);
+  std::string GetDiskAbsVerticalDensityName(int i);
+  std::string GetDiskAverageZName(int i);
+  std::string GetDiskSigmaZ2Name(int i);
+
 
   void GNUPLOT_DensityScripts(int i);
   void WriteTimeSeriesOutput();

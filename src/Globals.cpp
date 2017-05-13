@@ -31,6 +31,11 @@ namespace Global{
   std::vector<double> zbins;
   std::vector<double> ybins;
   std::vector<double> xbins;
+  std::vector<double> vzbins;
+  std::vector<double> vybins;
+  std::vector<double> vxbins;
+
+  std::vector<double> surfaceDensityWeights;
 
 #ifdef DENSITY_HISTOGRAMS
   Histogram2D<double> * diskXYHist;
@@ -40,6 +45,18 @@ namespace Global{
   Histogram2D<double> * haloXYHist;
   Histogram2D<double> * haloXZHist;
   Histogram2D<double> * haloYZHist;
+
+  Histogram1D<double> * diskSurfaceDensity;
+  Histogram1D<double> * diskVerticalDensity;
+  Histogram1D<double> * diskAbsVerticalDensity;
+  Histogram1D<double> * diskAverageZ;
+  Histogram1D<double> * diskAverageZDispersion;
+  Histogram1D<double> * diskVXVSR;
+  Histogram1D<double> * diskVYVSR;
+  Histogram1D<double> * diskVZVSR;
+  Histogram1D<double> * diskVZ2VSR;
+  Histogram1D<double> * diskSigmaZ2;
+
 
 #endif
 
