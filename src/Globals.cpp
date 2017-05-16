@@ -34,6 +34,8 @@ namespace Global{
   std::vector<double> vzbins;
   std::vector<double> vybins;
   std::vector<double> vxbins;
+  std::vector<double> vpbins;
+  std::vector<double> vrbins;
 
   std::vector<double> surfaceDensityWeights;
 
@@ -54,11 +56,24 @@ namespace Global{
   Histogram1D<double> * diskVXVSR;
   Histogram1D<double> * diskVYVSR;
   Histogram1D<double> * diskVZVSR;
+  Histogram1D<double> * diskVRVSR;
+  Histogram1D<double> * diskVPVSR;
+
+  Histogram1D<double> * diskVR2VSR;
+  Histogram1D<double> * diskVP2VSR;
   Histogram1D<double> * diskVZ2VSR;
-  Histogram1D<double> * diskSigmaZ2;
+  Histogram1D<double> * diskSigmaZ2VSR;
+  Histogram1D<double> * diskSigmaR2VSR;
+  Histogram1D<double> * diskSigmaP2VSR;
 
 
 #endif
+
+#ifdef IOM_ANALYSIS
+  Histogram1D<double> * diskEnergyVSR;
+  Histogram1D<double> * diskLZVSR;
+#endif
+
 
 #ifdef COMPUTE_VIRIAL_RATIO
   double virialRatio;

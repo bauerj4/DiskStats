@@ -280,8 +280,6 @@ void Snapshot::LoadGadget2(char * FILENAME, int n_snaps){
     for (int i = 0; i < nparts; i++){
       fread(&emptyFloat, sizeof(float), 1, file);
       float newPot = emptyFloat;
-      //      std::cout << newPot << "," << Positions[i][0] << "," << Positions[i][1] \
-      //		<< "," << Positions[i][2] << std::endl;
 #ifdef USE_POTENTIALS
       if (newPot <= 0.){
 	Potentials.push_back(newPot);

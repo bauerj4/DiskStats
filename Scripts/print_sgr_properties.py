@@ -1,8 +1,8 @@
 import numpy as np
 import sys
 
-MASS_CUT_LOW  = 4.e7
-MASS_CUT_HIGH = 2.e8
+MASS_CUT_LOW  = 1.e8
+MASS_CUT_HIGH = 5.e10
 R_CUT         = 0.075
 
 

@@ -132,14 +132,103 @@ std::string Global::GetDiskAverageZName(int i){
 }
 
 
-std::string Global::GetDiskSigmaZ2Name(int i){
+std::string Global::GetDiskSigmaZ2VSRName(int i){
   std::string base, number, tail;
 
-  base = Global::context.PathToGnuplot +  "/Disk_Sigma_Z2.";
+  base = Global::context.PathToGnuplot +  "/Disk_Sigma_Z2VSR.";
   tail = ".ascii";
   number = std::to_string(i);
 
   return (base + number + tail);
 }
+
+
+std::string Global::GetDiskSigmaR2VSRName(int i){
+  std::string base, number, tail;
+
+  base = Global::context.PathToGnuplot +  "/Disk_Sigma_R2VSR.";
+  tail = ".ascii";
+  number = std::to_string(i);
+
+  return (base + number + tail);
+}
+
+
+std::string Global::GetDiskSigmaP2VSRName(int i){
+  std::string base, number, tail;
+
+  base = Global::context.PathToGnuplot +  "/Disk_Sigma_P2VSR.";
+  tail = ".ascii";
+  number = std::to_string(i);
+
+  return (base + number + tail);
+}
+
+
+std::string Global::GetDiskVPVSRName(int i){
+  std::string base, number, tail;
+
+  base = Global::context.PathToGnuplot +  "/Disk_VPVSR.";
+  tail = ".ascii";
+  number = std::to_string(i);
+
+  return (base + number + tail);
+}
+
+
+
+std::string Global::GetDiskVRVSRName(int i){
+  std::string base, number, tail;
+
+  base = Global::context.PathToGnuplot +  "/Disk_VRVSR.";
+  tail = ".ascii";
+  number = std::to_string(i);
+
+  return (base + number + tail);
+}
+
+
+std::string Global::GetDiskVP2VSRName(int i){
+  std::string base, number, tail;
+
+  base = Global::context.PathToGnuplot +  "/Disk_VP2VSR.";
+  tail = ".ascii";
+  number = std::to_string(i);
+
+  return (base + number + tail);
+}
+
+
+
+std::string Global::GetDiskVR2VSRName(int i){
+  std::string base, number, tail;
+
+  base = Global::context.PathToGnuplot +  "/Disk_VR2VSR.";
+  tail = ".ascii";
+  number = std::to_string(i);
+
+  return (base + number + tail);
+}
+
+std::string Global::GetDiskLZVSRName(int i){
+  std::string base, number, tail;
+
+  base = Global::context.PathToGnuplot +  "/Disk_LZVSR.";
+  tail = ".ascii";
+  number = std::to_string(i);
+
+  return (base + number + tail);
+}
+
+std::string Global::GetDiskEnergyVSRName(int i){
+  std::string base, number, tail;
+
+  base = Global::context.PathToGnuplot +  "/Disk_EnergyVSR.";
+  tail = ".ascii";
+  number = std::to_string(i);
+
+  return (base + number + tail);
+}
+
 
 

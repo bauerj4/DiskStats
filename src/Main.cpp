@@ -38,6 +38,9 @@ int main(int argc, char ** argv){
   vybins = LinearSpacing(-200,200,context.YGridRes);
   vzbins = LinearSpacing(-200,200,context.ZGridRes);
 
+  vrbins = LinearSpacing(-200,200,2.*context.RGridRes);
+  vpbins = LinearSpacing(-200,200,2.*context.RGridRes);
+
 
   /*
     Set the surface density weights
@@ -131,8 +134,8 @@ int main(int argc, char ** argv){
 
     std::cout << "Getting halo position lists..." << std::endl;
     std::vector<double> haloXVals, haloYVals, haloZVals, diskXVals,\
-      diskYVals, diskZVals, diskAbsZVals, diskRVals, diskVZ2Vals, \
-      diskVXVals, diskVYVals, diskVZVals;
+      diskYVals, diskZVals, diskAbsZVals, diskRVals, diskVZ2Vals, diskVR2Vals, diskVP2Vals, \
+      diskVXVals, diskVYVals, diskVZVals, diskVRVals, diskVPVals;
 
     haloXVals = thisGalaxy->GetHaloXs();
     haloYVals = thisGalaxy->GetHaloYs();
@@ -157,9 +160,14 @@ int main(int argc, char ** argv){
     diskVXVals = thisGalaxy->GetDiskVXs();
     diskVYVals = thisGalaxy->GetDiskVYs();
     diskVZVals = thisGalaxy->GetDiskVZs();
+    diskVRVals = thisGalaxy->GetDiskVRs();
+    diskVPVals = thisGalaxy->GetDiskVPhis();
+
     for (int i = 0; i < diskVZVals.size(); i++){
       diskAbsZVals.push_back(fabs(diskZVals[i]));
       diskVZ2Vals.push_back(diskVZVals[i]*diskVZVals[i]);
+      diskVR2Vals.push_back(diskVRVals[i]*diskVRVals[i]);
+      diskVP2Vals.push_back(diskVPVals[i]*diskVPVals[i]);
     }
 
     diskRVals = thisGalaxy->GetDiskCylRs();
@@ -176,8 +184,16 @@ int main(int argc, char ** argv){
     diskVXVSR              = new Histogram1D<double>(diskRVals,sbins,0,diskVXVals);
     diskVYVSR              = new Histogram1D<double>(diskRVals,sbins,0,diskVYVals);
     diskVZVSR              = new Histogram1D<double>(diskRVals,sbins,0,diskVZVals);
+    diskVRVSR              = new Histogram1D<double>(diskRVals,sbins,0,diskVRVals);
+    diskVPVSR              = new Histogram1D<double>(diskRVals,sbins,0,diskVPVals);
+
     diskVZ2VSR             = new Histogram1D<double>(diskRVals,sbins,0,diskVZ2Vals);
-    diskSigmaZ2            = *diskVZ2VSR - *((*diskVZVSR)*(*diskVZVSR));
+    diskVR2VSR             = new Histogram1D<double>(diskRVals,sbins,0,diskVR2Vals);
+    diskVP2VSR             = new Histogram1D<double>(diskRVals,sbins,0,diskVP2Vals);
+
+    diskSigmaZ2VSR         = *diskVZ2VSR - *((*diskVZVSR)*(*diskVZVSR));
+    diskSigmaR2VSR         = *diskVR2VSR - *((*diskVRVSR)*(*diskVRVSR));
+    diskSigmaP2VSR         = *diskVP2VSR - *((*diskVPVSR)*(*diskVPVSR));
 
     std::cout << "Writing density histogram output..." << std::endl;
     diskXYHist->PrintASCII(GetDiskXYDensityHistName(snapNum));
@@ -187,11 +203,35 @@ int main(int argc, char ** argv){
     diskVerticalDensity->PrintASCII(GetDiskVerticalDensityName(snapNum));
     diskAbsVerticalDensity->PrintASCII(GetDiskAbsVerticalDensityName(snapNum));
     diskAverageZ->PrintASCII(GetDiskAverageZName(snapNum));
-    diskSigmaZ2->PrintASCII(GetDiskSigmaZ2Name(snapNum));
+
+    diskVPVSR->PrintASCII(GetDiskVPVSRName(snapNum));
+    diskVRVSR->PrintASCII(GetDiskVRVSRName(snapNum));
+
+    diskVP2VSR->PrintASCII(GetDiskVP2VSRName(snapNum));
+    diskVR2VSR->PrintASCII(GetDiskVR2VSRName(snapNum));
+
+
+    diskSigmaZ2VSR->PrintASCII(GetDiskSigmaZ2VSRName(snapNum));
+    diskSigmaR2VSR->PrintASCII(GetDiskSigmaR2VSRName(snapNum));
+    diskSigmaP2VSR->PrintASCII(GetDiskSigmaP2VSRName(snapNum));
 
     std::cout << "Done." << std::endl;
     GNUPLOT_DensityScripts(snapNum);
 #endif // DENSITY_HISTOGRAMS
+
+#ifdef IOM_ANALYSIS
+    std::vector<double> diskEs, diskLzs;
+
+    diskEs  = thisGalaxy->GetDiskEnergies();
+    diskLzs = thisGalaxy->GetDiskLzs();
+
+    diskEnergyVSR  = new Histogram1D<double>(diskRVals,sbins,0,diskEs);
+    diskLZVSR      = new Histogram1D<double>(diskRVals,sbins,0,diskLzs);
+
+    diskLZVSR->PrintASCII(GetDiskLZVSRName(snapNum));
+    diskEnergyVSR->PrintASCII(GetDiskEnergyVSRName(snapNum));
+
+#endif
 
 #ifdef COMPUTE_VIRIAL_RATIO
     virialRatio = thisGalaxy->ComputeVirialRatio();

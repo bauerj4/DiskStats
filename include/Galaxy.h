@@ -42,7 +42,11 @@ class Galaxy{
   std::vector<double> GetDiskVXs();
   std::vector<double> GetDiskVYs();
   std::vector<double> GetDiskVZs();
+  std::vector<double> GetDiskVRs();
+  std::vector<double> GetDiskVPhis();
   std::vector<double> GetDiskCylRs();
+  std::vector<double> GetDiskEnergies();
+  std::vector<double> GetDiskLzs();
   std::vector<double> GetAngularMomentumAxis(){return diskAngularMomentumAxis;}
   std::vector<std::vector<double> > GetDiskMofITensor();
 };

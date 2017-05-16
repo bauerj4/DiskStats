@@ -499,6 +499,70 @@ std::vector<double> Galaxy::GetDiskCylRs(){
 }
 
 
+/*
+  Get disk radial velocities
+*/
+
+std::vector<double> Galaxy::GetDiskVRs(){
+  std::vector<double> vRVals;
+  for (int i = 0; i < myDisk.P.size(); i++){
+    vRVals.push_back(myDisk.P[i]->VelR());
+  }
+  return vRVals;
+}
+
+/*
+  Get disk azimuthal velocities
+*/
+
+std::vector<double> Galaxy::GetDiskVPhis(){
+  std::vector<double> vPhiVals;
+  for (int i = 0; i < myDisk.P.size(); i++){
+    vPhiVals.push_back(myDisk.P[i]->VelPhi());
+  }
+  return vPhiVals;
+}
+
+
+/*
+  Get disk z angular momentum
+*/
+
+std::vector<double> Galaxy::GetDiskLzs(){
+  std::vector<double> lZVals;
+  double y,vy,x,vx;
+
+  for (int i = 0; i < myDisk.P.size(); i++){
+    x  = myDisk.P[i]->PosX();
+    y  = myDisk.P[i]->PosY();
+    vx = myDisk.P[i]->VelX();
+    vy = myDisk.P[i]->VelY();
+
+    lZVals.push_back(x * vy - y * vx);
+  }
+  return lZVals;
+}
+
+/*
+  Get disk energies
+*/
+
+std::vector<double> Galaxy::GetDiskEnergies(){
+  std::vector<double> EVals;
+  double vx,vy,vz,v,pot;
+
+  for (int i = 0; i < myDisk.P.size(); i++){
+    vx  = myDisk.P[i]->VelX();
+    vy  = myDisk.P[i]->VelY();
+    vy  = myDisk.P[i]->VelY();
+    pot = myDisk.P[i]->Potential();
+    v   = vx*vx + vy*vy + vz*vz;
+
+    EVals.push_back(0.5 * v + pot);
+  }
+  return EVals;
+}
+
 
 /*
   Compute the moment of inertia tensor

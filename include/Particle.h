@@ -32,6 +32,9 @@ class Particle{
   double VelY(){return Vel[1];}
   double VelZ(){return Vel[2];}
 
+  double VelR();
+  double VelPhi();
+
   double Potential(){return Pot;}
   double M(){return Mass;}
 

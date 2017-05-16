@@ -2,6 +2,7 @@
 #include "../include/Compile_Time_Options.h"
 #include "../include/Particle.h"
 #include <vector>
+#include <cmath>
 
 /*
   Implementation for the particle class
@@ -90,3 +91,27 @@ void Particle::Rotate3(){
 
 }
 
+
+/*
+  Calculate VR magnitude for a particle
+*/
+
+double Particle::VelR(){
+  double r,vr;
+  
+  r  = sqrt(Pos[0]*Pos[0] + Pos[1] * Pos[1]);
+  vr = (Pos[0] * Vel[0] + Pos[1] * Vel[1])/r;
+
+  return vr;
+}
+
+/*
+  Calculate VPhi magnitude for a particle
+*/
+
+double Particle::VelPhi(){
+  double r;
+
+  r       = sqrt(Pos[0]*Pos[0] + Pos[1] * Pos[1]);
+  return (-Vel[0] * Pos[1]  + Vel[1] * Pos[0])/r;
+}

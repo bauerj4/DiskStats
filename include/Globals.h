@@ -35,6 +35,8 @@ namespace Global{
   extern std::vector<double> vzbins;
   extern std::vector<double> vybins;
   extern std::vector<double> vxbins;
+  extern std::vector<double> vrbins;
+  extern std::vector<double> vpbins;
   extern std::vector<double> timeArr;
   extern std::vector<double> kineticEnergies;
   extern std::vector<double> potentialEnergies;
@@ -64,9 +66,20 @@ namespace Global{
   extern Histogram1D<double> * diskVXVSR;
   extern Histogram1D<double> * diskVYVSR;
   extern Histogram1D<double> * diskVZVSR;
-  extern Histogram1D<double> * diskVZ2VSR;
-  extern Histogram1D<double> * diskSigmaZ2;
+  extern Histogram1D<double> * diskVRVSR;
+  extern Histogram1D<double> * diskVPVSR;
 
+  extern Histogram1D<double> * diskVR2VSR;
+  extern Histogram1D<double> * diskVP2VSR;
+  extern Histogram1D<double> * diskVZ2VSR;
+  extern Histogram1D<double> * diskSigmaZ2VSR;
+  extern Histogram1D<double> * diskSigmaR2VSR;
+  extern Histogram1D<double> * diskSigmaP2VSR;
+#endif
+
+#ifdef IOM_ANALYSIS
+  extern Histogram1D<double> * diskEnergyVSR;
+  extern Histogram1D<double> * diskLZVSR;
 #endif
 
 #ifdef COMPUTE_VIRIAL_RATIO
@@ -143,8 +156,15 @@ namespace Global{
   std::string GetDiskVerticalDensityName(int i);
   std::string GetDiskAbsVerticalDensityName(int i);
   std::string GetDiskAverageZName(int i);
-  std::string GetDiskSigmaZ2Name(int i);
-
+  std::string GetDiskSigmaZ2VSRName(int i);
+  std::string GetDiskSigmaR2VSRName(int i);
+  std::string GetDiskSigmaP2VSRName(int i);
+  std::string GetDiskVPVSRName(int i);
+  std::string GetDiskVRVSRName(int i);
+  std::string GetDiskVP2VSRName(int i);
+  std::string GetDiskVR2VSRName(int i);
+  std::string GetDiskLZVSRName(int i);
+  std::string GetDiskEnergyVSRName(int i);
 
   void GNUPLOT_DensityScripts(int i);
   void WriteTimeSeriesOutput();
