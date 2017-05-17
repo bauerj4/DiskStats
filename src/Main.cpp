@@ -6,6 +6,7 @@
 #include "../include/Histogram.h"
 #include <string>
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <cmath>
 
@@ -135,7 +136,7 @@ int main(int argc, char ** argv){
     std::cout << "Getting halo position lists..." << std::endl;
     std::vector<double> haloXVals, haloYVals, haloZVals, diskXVals,\
       diskYVals, diskZVals, diskAbsZVals, diskRVals, diskVZ2Vals, diskVR2Vals, diskVP2Vals, \
-      diskVXVals, diskVYVals, diskVZVals, diskVRVals, diskVPVals;
+      diskVXVals, diskVYVals, diskVZVals, diskVRVals, diskVPVals, diskPhiVals;
 
     haloXVals = thisGalaxy->GetHaloXs();
     haloYVals = thisGalaxy->GetHaloYs();
@@ -170,7 +171,8 @@ int main(int argc, char ** argv){
       diskVP2Vals.push_back(diskVPVals[i]*diskVPVals[i]);
     }
 
-    diskRVals = thisGalaxy->GetDiskCylRs();
+    diskRVals   = thisGalaxy->GetDiskCylRs();
+    diskPhiVals = thisGalaxy->GetDiskCylPhis();
 
     std::cout << "Done." << std::endl;
     diskXYHist = new Histogram2D<double>(diskXVals, diskYVals, xbins,ybins);
@@ -217,6 +219,10 @@ int main(int argc, char ** argv){
 
     std::cout << "Done." << std::endl;
     GNUPLOT_DensityScripts(snapNum);
+
+#ifdef RADIAL_MODES
+    ComputeAndPrintRadialModes(diskPhiVals, diskRVals);
+#endif // RADIAL_MODES
 #endif // DENSITY_HISTOGRAMS
 
 #ifdef IOM_ANALYSIS
@@ -248,6 +254,12 @@ int main(int argc, char ** argv){
     diskZVals.clear();
 #endif
 
+#ifdef RADIAL_MODES
+    radialAsVSR.clear();
+    radialBsVSR.clear();
+    radialCsVSR.clear();
+#endif
+
     delete diskXYHist;
     delete diskXZHist;
     delete diskYZHist;
@@ -266,3 +278,74 @@ int main(int argc, char ** argv){
   WriteTimeSeriesOutput();
   return 0;  // Success
 }
+
+
+/*
+  This function computes and prints the radial modes of the disk.
+  Collapsed in this function to prevent clutter.
+*/
+
+#if defined(DENSITY_HISTOGRAMS) && defined(RADIAL_MODES)
+inline void Global::ComputeAndPrintRadialModes(std::vector<double> &diskPhis, \
+					       std::vector<double> &diskRVals){
+  std::vector<double> aWeights;
+  std::vector<double> bWeights;
+  std::vector<double> cVals;
+  std::string base, number, tail, fname;
+
+  base   = Global::context.PathToGnuplot + "/Disk_Radial_Modes.";
+  tail   = ".ascii";
+  number = std::to_string(snapNum);
+  fname  = base + number + tail;
+
+
+  std::ofstream FILE(fname);
+
+  Histogram1D<double> * thisAHist, * thisBHist;
+
+  for (int m = 0; m <= RADIAL_MODES; m++){
+
+    // Compute weights for mode m
+    for (int i = 0; i < diskPhis.size(); i++){
+      aWeights.push_back(cos(diskPhis[i] * m));
+      bWeights.push_back(sin(diskPhis[i] * m));
+      //std::cout << "a_m,m, phi = " << aWeights[i] << ", "<< m << ", " << diskPhis[i] << std::endl;
+    }
+    
+    // Make histograms
+    thisAHist = new Histogram1D<double>(diskRVals,sbins,0,aWeights);
+    thisBHist = new Histogram1D<double>(diskRVals,sbins,0,bWeights);
+
+    // Get c_m(r) vals
+    for (int i = 0; i < thisAHist->counts.size(); i++){
+      cVals.push_back(sqrt(thisAHist->counts[i] * thisAHist->counts[i] + \
+			   thisBHist->counts[i] * thisBHist->counts[i]));
+    }
+    radialAsVSR.push_back(thisAHist->counts);
+    radialBsVSR.push_back(thisBHist->counts);
+    radialCsVSR.push_back(cVals);
+
+
+    delete thisAHist;
+    delete thisBHist;
+    aWeights.clear();
+    bWeights.clear();
+    cVals.clear();
+  }
+
+  // Now print file
+
+  for (int i = 0; i < sbins.size() - 1; i++){
+    FILE << sbins[i] << " ";
+    for (int m = 0; m <= RADIAL_MODES; m++){ 
+      //FILE << radialAsVSR[m][i] << " ";
+      //FILE << radialBsVSR[m][i] << " ";
+      FILE << radialCsVSR[m ][i] << " ";
+    }
+    FILE << "\n";
+  }
+  
+  FILE.close();
+}
+
+#endif

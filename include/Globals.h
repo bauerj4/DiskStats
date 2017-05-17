@@ -82,6 +82,12 @@ namespace Global{
   extern Histogram1D<double> * diskLZVSR;
 #endif
 
+#ifdef RADIAL_MODES
+  extern std::vector<std::vector<double> > radialAsVSR;
+  extern std::vector<std::vector<double> > radialBsVSR;
+  extern std::vector<std::vector<double> > radialCsVSR;
+#endif
+
 #ifdef COMPUTE_VIRIAL_RATIO
   extern double virialRatio;
   extern std::vector<double> viralRatios;
@@ -168,5 +174,8 @@ namespace Global{
 
   void GNUPLOT_DensityScripts(int i);
   void WriteTimeSeriesOutput();
-  
+
+
+  inline void ComputeAndPrintRadialModes(std::vector<double> &diskPhis,\
+					 std::vector<double> &diskRVals);  
 }

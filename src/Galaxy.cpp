@@ -498,6 +498,17 @@ std::vector<double> Galaxy::GetDiskCylRs(){
   return rVals;
 }
 
+std::vector<double> Galaxy::GetDiskCylPhis(){
+  std::vector<double> phiVals;
+  double phi;
+  for (int i = 0; i < myDisk.P.size(); i++){
+    phi = atan2(myDisk.P[i]->PosY(), myDisk.P[i]->PosX());
+    phiVals.push_back(phi);
+  }
+
+  return phiVals;
+}
+
 
 /*
   Get disk radial velocities

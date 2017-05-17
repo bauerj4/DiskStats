@@ -144,9 +144,10 @@ Histogram1D<T>::Histogram1D(std::vector<T> &data, std::vector<T> &xbins,\
       }
     }
   }
-
-
 }
+
+
+// Overloaded constructor for complex weights
 
 
 
@@ -157,7 +158,7 @@ void Histogram1D<T>::PrintASCII(std::string filepath){
   std::ofstream histOut(filepath.c_str());
   
   for (int i = 0; i < counts.size(); i++){
-    std::cout << i << "," << bins.size() << "," << counts.size() << std::endl;
+    //std::cout << i << "," << bins.size() << "," << counts.size() << std::endl;
     histOut << bins[i] + 0.5 * (bins[i+1] - bins[i]) << " " << counts[i] << std::endl;
   }
   histOut.close();

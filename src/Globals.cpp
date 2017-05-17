@@ -74,6 +74,13 @@ namespace Global{
   Histogram1D<double> * diskLZVSR;
 #endif
 
+#ifdef RADIAL_MODES
+  std::vector<std::vector<double> > radialAsVSR; // cos component
+  std::vector<std::vector<double> > radialBsVSR; // sin component
+  std::vector<std::vector<double> > radialCsVSR; // magnitude
+#endif
+
+
 
 #ifdef COMPUTE_VIRIAL_RATIO
   double virialRatio;

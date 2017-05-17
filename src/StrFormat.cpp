@@ -230,5 +230,3 @@ std::string Global::GetDiskEnergyVSRName(int i){
   return (base + number + tail);
 }
 
-
-
