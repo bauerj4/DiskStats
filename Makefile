@@ -8,7 +8,7 @@ SRC 	 = src/Main.cpp src/Snapshot.cpp src/ReadParameterFile.cpp src/Globals.cpp 
 
 make:
 	python make_macros.py
-	$(CC) $(CFLAGS) $(SRC) -std=c++11 -Wall -O3 -lm -fopenmp -o bin/DiskStats++
+	$(CC) $(CFLAGS) $(SRC) -std=c++11 -Wall -O3 -lm -L/usr/lib64/libgomp.so.1 -o bin/DiskStats++
 	$(CC) Scripts/merge_ics.cpp -o bin/merge_ics
 
 clean:

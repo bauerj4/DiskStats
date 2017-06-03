@@ -62,10 +62,17 @@ namespace Global{
   Histogram1D<double> * diskVR2VSR;
   Histogram1D<double> * diskVP2VSR;
   Histogram1D<double> * diskVZ2VSR;
+  Histogram1D<double> * diskVRVPVSR;
+  Histogram1D<double> * diskVRVZVSR;
+  Histogram1D<double> * diskVZVPVSR;
+
+
   Histogram1D<double> * diskSigmaZ2VSR;
   Histogram1D<double> * diskSigmaR2VSR;
   Histogram1D<double> * diskSigmaP2VSR;
-
+  Histogram1D<double> * diskSigmaRSigmaPVSR;
+  Histogram1D<double> * diskSigmaZSigmaPVSR;
+  Histogram1D<double> * diskSigmaRSigmaZVSR;
 
 #endif
 

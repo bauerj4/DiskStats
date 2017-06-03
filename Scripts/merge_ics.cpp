@@ -745,15 +745,22 @@ int main(int argc, char ** argv){
     //      iss >> vz;
 
 
-    disk_m.push_back(atof(m.c_str()) * massUnitConversion);
+    disk_m.push_back(atof(m.c_str())* massUnitConversion);
+
+#ifdef GADGET_COSMOLOGY
+    disk_x.push_back(atof(x.c_str()) / pow(timeFromRedshift,1));
+    disk_y.push_back(atof(y.c_str()) / pow(timeFromRedshift,1));
+    disk_z.push_back(atof(z.c_str()) / pow(timeFromRedshift,1));
+#else
     disk_x.push_back(atof(x.c_str()));
     disk_y.push_back(atof(y.c_str()));
     disk_z.push_back(atof(z.c_str()));
+#endif
 
 #ifdef GADGET_COSMOLOGY
-    disk_vx.push_back(atof(vx.c_str()) * 100. / (pow(timeFromRedshift,0.5) * 0.679));
-    disk_vy.push_back(atof(vy.c_str()) * 100. / (pow(timeFromRedshift,0.5) * 0.679));
-    disk_vz.push_back(atof(vz.c_str()) * 100. / (pow(timeFromRedshift,0.5) * 0.679));
+    disk_vx.push_back(atof(vx.c_str()) * 100. / (pow(timeFromRedshift,0.5)));
+    disk_vy.push_back(atof(vy.c_str()) * 100. / (pow(timeFromRedshift,0.5) ));
+    disk_vz.push_back(atof(vz.c_str()) * 100. / (pow(timeFromRedshift,0.5) ));
 #else
     disk_vx.push_back(atof(vx.c_str()) * 100.);
     disk_vy.push_back(atof(vy.c_str()) * 100.);

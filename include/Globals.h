@@ -72,9 +72,17 @@ namespace Global{
   extern Histogram1D<double> * diskVR2VSR;
   extern Histogram1D<double> * diskVP2VSR;
   extern Histogram1D<double> * diskVZ2VSR;
+  extern Histogram1D<double> * diskVRVPVSR;
+  extern Histogram1D<double> * diskVRVZVSR;
+  extern Histogram1D<double> * diskVZVPVSR;
+
   extern Histogram1D<double> * diskSigmaZ2VSR;
   extern Histogram1D<double> * diskSigmaR2VSR;
   extern Histogram1D<double> * diskSigmaP2VSR;
+  extern Histogram1D<double> * diskSigmaRSigmaPVSR;
+  extern Histogram1D<double> * diskSigmaZSigmaPVSR;
+  extern Histogram1D<double> * diskSigmaRSigmaZVSR;
+
 #endif
 
 #ifdef IOM_ANALYSIS
@@ -165,10 +173,23 @@ namespace Global{
   std::string GetDiskSigmaZ2VSRName(int i);
   std::string GetDiskSigmaR2VSRName(int i);
   std::string GetDiskSigmaP2VSRName(int i);
+
+  std::string GetDiskSigmaRSigmaPVSRName(int i);
+  std::string GetDiskSigmaRSigmaZVSRName(int i);
+  std::string GetDiskSigmaZSigmaPVSRName(int i);
+
   std::string GetDiskVPVSRName(int i);
   std::string GetDiskVRVSRName(int i);
+  std::string GetDiskVZVSRName(int i);
+
   std::string GetDiskVP2VSRName(int i);
   std::string GetDiskVR2VSRName(int i);
+  std::string GetDiskVZ2VSRName(int i);
+
+
+  std::string GetDiskVRVPVSRName(int i);
+  std::string GetDiskVRVZVSRName(int i);
+  std::string GetDiskVZVPVSRName(int i);
   std::string GetDiskLZVSRName(int i);
   std::string GetDiskEnergyVSRName(int i);
 
